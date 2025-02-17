@@ -1,0 +1,167 @@
+/* Full-page container */
+.signin-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Left Section - Background Image */
+  .signin-background {
+    flex: 1.5;
+    background: url("../images/sign-in.jpeg") no-repeat center center/cover;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white; /* Ensures text is visible on dark backgrounds */
+  }
+  
+  /* Dark Overlay for contrast */
+  .signin-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);/* Dark overlay effect */
+  }
+  .text1{
+    color: white;
+  }
+  
+  /* Text Overlay */
+  .signin-text {
+    position: absolute;
+    z-index: 2; /* Ensures text appears above the overlay */
+    color: white;
+    padding: 20px;
+  }
+  
+  .signin-title {
+    font-size: calc(1.325rem + .9vw);
+    font-family:sans-serif;
+    font-weight: bold;
+    margin-top: 10%;
+    margin-bottom: 5%;
+  }
+  .text1{
+    font-size: 42px;
+    font-weight: bold;
+    margin-top: 30%;
+    margin-bottom: 3%;
+  }
+  .text2{
+    font-size: 26px;
+    
+   
+  }
+  .signin-subtext {
+    font-size: 16px;
+    
+    opacity: 0.9; /* Slight transparency for a clean look */
+  }
+  
+  
+  /* Dark Overlay for better contrast */
+  
+  
+  /* Right Section - Login Form */
+  .signin-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+  }
+  
+  /* Card Styling */
+  .signin-card {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    text-align: center;
+  }
+  
+  /* Title & Subtext */
+  
+  
+  
+  
+  /* Input Fields */
+  .signin-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  /* Sign In Button */
+  .signin-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .signin-btn:hover {
+    background: #0056b3;
+  }
+  
+  /* Divider */
+  .signin-divider {
+    margin: 15px 0;
+    font-size: 14px;
+    color: gray;
+  }
+  
+  /* Google Sign-In Button */
+  .btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .btn-google img {
+    margin-right: 8px;
+  }
+  
+  .btn-google:hover {
+    background:aliceblue;
+    color: white;
+  }
+  
+  /* Footer */
+  .signin-footer {
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  
+  .signin-footer a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .signin-footer a:hover {
+    text-decoration: underline;
+  }
+  
