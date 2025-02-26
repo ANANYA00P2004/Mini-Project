@@ -9,7 +9,7 @@
   /* Left Section - Background Image */
   .signin-background {
     flex: 1.5;
-    background: url("../images/sign-in.jpeg") no-repeat center center/cover;
+    background: url("../images/sign-up.jpeg") no-repeat center center/cover;
     position: relative;
     display: flex;
     align-items: center;

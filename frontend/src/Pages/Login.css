@@ -82,7 +82,7 @@
   }
   /* Left Section - Background Image */
   .signin-background {
-    background: url("../images/sign-in.jpeg") no-repeat center center;
+    background: url("../images/sign-up.jpeg") no-repeat center center;
     background-size: cover;
     width: 55%;
     position: relative;
