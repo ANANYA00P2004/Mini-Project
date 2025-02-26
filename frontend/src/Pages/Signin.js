@@ -1,55 +1,61 @@
 import React, { useState } from "react";
-import { auth, googleProvider, signInWithEmailAndPassword, signInWithPopup } from "../firebaseConfig";
+import supabase from "../supabaseClient"; // ✅ Remove curly braces
+
 import { FaGoogle } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
-import "./Signin.css"
+import "./Signin.css";
 
 const SignInPage = () => {
-  const [email, setEmail] = useState("");  // Changed 'username' to 'email'
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "email") setEmail(value);  // Changed 'username' to 'email'
+    if (name === "email") setEmail(value);
     else if (name === "password") setPassword(value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);  // Changed 'username' to 'email'
-      alert("Sign-in successful!");
-    } catch (error) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
       alert(error.message);
+    } else {
+      alert("Sign-in successful!");
     }
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      alert("Signed in with Google!");
-    } catch (error) {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
+
+    if (error) {
       alert(error.message);
+    } else {
+      alert("Redirecting to Google authentication...");
     }
   };
 
   return (
     <div className="signin-container">
-      {/* Left Section - Background Image */}
       <div className="signin-background">
-      
-        <div className="signin-overlay"><h2 className="text1">Welcome back!!</h2>
-        <p className="text2">Enter the future of payments today:)</p></div>
+        <div className="signin-overlay">
+          <h2 className="text1">Welcome back!!</h2>
+          <p className="text2">Enter the future of payments today:)</p>
+        </div>
       </div>
 
-      {/* Right Section - Login Form */}
       <div className="signin-form">
         <div className="signin-card">
           <div className="right-side">
-          <h3 className="signin-title">LOGIN</h3>
+            <h3 className="signin-title">LOGIN</h3>
           </div>
-          
 
           <form onSubmit={handleSubmit}>
             <input
@@ -68,14 +74,20 @@ const SignInPage = () => {
               onChange={handleChange}
               required
             />
-            <button type="submit" className="signin-btn">Sign In</button>
+            <button type="submit" className="signin-btn">
+              Sign In
+            </button>
           </form>
 
           <div className="signin-divider">Or sign in with</div>
 
-          {/* Google Sign-In Button */}
           <button onClick={handleGoogleSignIn} className="btn-google">
-            <img alt="Google Logo" src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" height="30px" width="30px" />
+            <img
+              alt="Google Logo"
+              src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
+              height="30px"
+              width="30px"
+            />
             Sign in with Google
           </button>
 

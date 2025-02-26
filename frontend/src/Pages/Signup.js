@@ -1,25 +1,66 @@
-import React, { useState } from "react";
-import { auth, googleProvider, createUserWithEmailAndPassword, signInWithPopup } from "../firebaseConfig";
-import { FaGoogle } from "react-icons/fa";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css"
+import React, { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { Auth } from "@supabase/auth-ui-react";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import "../Pages/Signup.css"
 
-const SignUpPage = () => {
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
+
+
+const SignUp = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "username") setUsername(value);
+    if (name === "name") setName(value);
     else if (name === "email") setEmail(value);
     else if (name === "password") setPassword(value);
+    else if (name === "confirmPassword") setConfirmPassword(value);
+  };
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    return regex.test(password);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+    if (!validatePassword(password)) {
+      alert("Password must have at least 1 uppercase, 1 lowercase, 1 number, 1 special character, and be at least 6 characters long.");
+      return;
+    }
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name } },
+      });
+      if (error) throw error;
       alert("Sign-up successful!");
     } catch (error) {
       alert(error.message);
@@ -28,7 +69,8 @@ const SignUpPage = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const { data, error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+      if (error) throw error;
       alert("Logged in with Google!");
     } catch (error) {
       alert(error.message);
@@ -36,84 +78,30 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="container-fluid vh-100 signup-container">
-      <div className="row h-100">
-        {/* Left Section - Welcome Text */}
-        <div className="col-lg-6 d-none d-lg-flex gradient-background position-relative align-items-center justify-content-center">
-          <div className="curved-background"></div>
-          <div className="welcome-text text-white text-center position-relative">
-            <h2 className="display-4 fw-bold mb-4">Welcome to Wyzo!</h2>
-            <p className="lead">Enter your personal details to sign up to Wyzo, The Ultimate Financial Tracker.</p>
-            </div>
-        </div>
+    <div className="main-signup">
+    <div className="signup-container">
+      <h2>Sign Up</h2>
+      <form className="signup-form" onSubmit={handleSubmit}>
+  <input type="text" name="name" placeholder="Name" onChange={handleChange} required />
+  <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
+  <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
+  <input type="password" name="confirmPassword" placeholder="Confirm Password" onChange={handleChange} required />
+  <button type="submit">Sign Up</button>
+</form>
 
-        {/* Right Section - Sign Up Form */}
-        <div className="col-lg-6 d-flex align-items-center justify-content-center">
-          <div className="card shadow-lg p-5 form-card">
-            <h2 className="text-center mb-4">Create an Account</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="username"
-                  name="username"
-                  placeholder="Username"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="email"
-                  className="form-control"
-                  id="email"
-                  name="email"
-                  placeholder="Email address"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  name="password"
-                  placeholder="Password"
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary w-100 mb-3">
-                Sign up
-              </button>
-            </form>
-
-            {/* Google Sign-In Button */}
-            <div className="text-center mb-3">
-              <span className="text-muted">Or continue with</span>
-            </div>
-            <button
-              onClick={handleGoogleSignIn}
-              className="btn btn-google w-100 d-flex align-items-center justify-content-center"
-            >
-              <img alt="Google Logo" src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" height="30px" width="30px" />
-              Sign up with Google
-            </button>
-
-            {/* Login Link */}
-            <p className="text-center mt-3">
-              Already have an account?{" "}
-              <a href="./sign-in" className="text-primary">
-                Login here
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <button onClick={handleGoogleSignIn} className="btn-google-signup">
+  <img
+    alt="Google Logo"
+    src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
+    height="30px"
+    width="30px"
+    style={{ marginRight: "8px" }}
+  />
+  Sign up with Google
+</button>
+</div>
+</div>
   );
 };
 
-export default SignUpPage;
+export default SignUp;
