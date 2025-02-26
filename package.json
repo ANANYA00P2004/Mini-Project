@@ -6,9 +6,10 @@
     "bootstrap": "^5.3.3",
     "cra-template": "1.2.0",
     "firebase": "^11.2.0",
+    "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-icons": "^5.4.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1"
   },
@@ -16,7 +17,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "tailwind:init": "tailwindcss init -p"
   },
   "eslintConfig": {
     "extends": [
@@ -35,5 +37,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.8"
   }
 }
