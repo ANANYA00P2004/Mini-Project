@@ -1,0 +1,109 @@
+.future-events {
+    flex-grow: 1;
+    padding: 20px;
+    background: #F5F5F5;
+    transition: all 0.3s ease-in-out;
+}
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+/* Ensure sidebar behavior follows layout.css */
+.future-events-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: all 0.3s ease-in-out;
+}
+/* Ensure it follows sidebar width changes */
+.sidebar-expanded .main-content {
+    margin-left: 250px; 
+    width: calc(100% - 250px);
+}
+
+.sidebar-collapsed .main-content {
+    margin-left: 80px; 
+    width: calc(100% - 80px);
+}
+
+h2 {
+    color: #0A0F5B;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.description {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.add-event {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add-event:hover {
+    background: #E0E0E0;
+}
+
+.add-icon {
+    font-size: 20px;
+    color: #0A0F5B;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.add-icon:active {
+    transform: scale(1.1);
+}
+
+.event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.event-form input, .event-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.event-form button {
+    padding: 10px;
+    background: #0A0F5B;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.event-form button:disabled {
+    background: gray;
+    cursor: not-allowed;
+}
+
+.event-row div {
+    padding: 10px 15px;
+    border-radius: 5px;
+    min-width: 120px;
+    text-align: center;
+}
+
+.upcoming .event-row div { background: #D9E3FF; color: #0A0F5B; }
+.today .event-row div { background: #C7F7C9; color: #087F23; }
+.past .event-row div { background: #D3D3D3; color: #555; }
+
+.double-clicked { background: #FFBABA; color: #D8000C; }

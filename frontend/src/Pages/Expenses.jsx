@@ -19,7 +19,7 @@ import {
   MessageSquare,
   UserCircle,
 } from "lucide-react";
-import Image from "../images/logo.jpeg";
+import Image from "../images/logo.PNG";
 import "./Expenses.css"; // Import the regular CSS file
 
 export default function ExpensesPage() {

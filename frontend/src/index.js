@@ -6,6 +6,8 @@ import SignIn from "./Pages/Signin";
 import SignUp from "./Pages/Signup";
 import Expenses from "./Pages/Expenses";
 import BudgetPlan from "./Pages/BudgetPlan";
+// import Wishlist from "./Pages/Wishlist";
+import FutureEvents from "./Pages/FutureEvent";
 
 const Root = () => {
   return (
@@ -15,7 +17,9 @@ const Root = () => {
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/expenses" element={<Expenses />} />
-        <Route path="/plan" element={<BudgetPlan />} /> 
+        <Route path="/plan" element={<BudgetPlan />} />
+        <Route path="/futureevents" element={<FutureEvents />} /> 
+        {/* <Route path="/wishlist" element={<Wishlist />} /> */}
       </Routes>
     </BrowserRouter>
   );

@@ -1,0 +1,89 @@
+/* Ensuring nothing leaks outside */
+.wyzo-container {
+    position: relative;
+    display: flex;
+} 
+
+/* Unique Sidebar Styling */
+.wyzo-sidebar {
+    width: 220px;
+    background: #0A0F5B;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 15px;
+    overflow: hidden;
+}
+
+.wyzo-sidebar.closed {
+    width: 70px;
+}
+
+/* Sidebar Top - Logo Area */
+.wyzo-sidebar-top {
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+    background: #0A0F5B;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wyzo-sidebar-logo {
+    width: 80px;
+    height: auto;
+    transition: width 0.3s ease;
+}
+
+.wyzo-sidebar.closed .wyzo-sidebar-logo {
+    width: 50px;
+}
+
+/* Sidebar Links */
+.wyzo-sidebar-links {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 20px;
+}
+
+.wyzo-sidebar-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: white;
+    padding: 15px 25px;
+    width: 100%;
+    font-size: 16px;
+    transition: background 0.3s ease, padding-left 0.3s;
+    gap: 15px;
+}
+
+.wyzo-sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.2);
+    padding-left: 30px;
+}
+
+/* Hide Text when Sidebar is Closed */
+.wyzo-sidebar.closed .wyzo-link-text {
+    display: none;
+}
+
+/* Profile Icon */
+.wyzo-profile-icon {
+    margin-top: auto;
+    padding-bottom: 20px;
+}
+
+.wyzo-profile-pic {
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+}
