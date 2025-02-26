@@ -1,0 +1,357 @@
+/* General Styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+html, body {
+  scroll-behavior: smooth;
+  overflow-x: hidden; 
+}
+
+/* Main Landing Container */
+.landing-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #0A0F5B, #141E7E);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Main Part - Occupies Full Screen Initially */
+.main-part {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Navigation Bar */
+.navbar {
+  width: 90%;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  position: absolute !important;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: fadeInDown 1s ease-in-out forwards;
+}
+
+.logo {
+  width: 140px;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.feature-btn,
+.login-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+}
+
+.feature-btn:hover,
+.login-btn:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.login-btn {
+  border: 2px solid white;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.login-btn:hover {
+  background: white;
+  color: #0A0F5B;
+  transform: scale(1.05);
+}
+
+/* Hero Section */
+.hero-section {
+  width: 90%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  padding-top: 50px;
+}
+
+.hero-text {
+  padding-left: 40px;
+  max-width: 500px;
+  animation: fadeInLeft 1s ease-in-out;
+}
+
+.hero-text h1 {
+  font-size: 56px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.hero-text p {
+  font-size: 22px;
+  margin-bottom: 30px;
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.signup-btn {
+  background: white;
+  color: #0A0F5B;
+  border: none;
+  padding: 14px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.signup-btn:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.hero-image {
+  padding-right: 50px;
+  width: 50%;
+  max-width: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInRight 1s ease-in-out;
+}
+
+.hero-image img {
+  width: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+/* FEATURES SECTION (white background) */
+.features-full-container {
+  width: 100%;
+  background: white;
+  color: #0A0F5B;
+  padding: 50px 5%;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 1s ease;
+}
+
+.features-full-container.features-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Features Heading */
+.features-heading {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.features-heading h2 {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+/* Features Content */
+.features-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+/* Left side image */
+.features-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeInLeft 1s ease-in-out;
+}
+
+.features-image img {
+  width: 100%;
+  max-width: 500px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Right side carousel */
+.features-carousel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeInRight 1s ease-in-out;
+}
+
+/* Feature Card (Bigger Size) */
+.feature-card {
+  background: #0A0F5B;
+  border: 2px solid white;
+  border-radius: 10px;
+  width: 600px;
+  height: 350px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #fff;
+}
+
+/* Circle on the left */
+.feature-circle {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 20px;
+}
+
+.feature-circle span {
+  font-size: 28px;
+  font-weight: bold;
+  color: #0A0F5B;
+}
+
+/* Text container inside the card */
+.feature-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 500px;
+}
+
+.feature-text h3 {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+/* Carousel Controls */
+.carousel-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.carousel-controls button {
+  background: none;
+  border: 2px solid #0A0F5B;
+  color: #0A0F5B;
+  font-size: 20px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.carousel-controls button:hover {
+  background: #0A0F5B;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Keyframe Animations */
+@keyframes fadeInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Footer Section */
+.footer-container {
+  background-color: #001f5b;
+  color: white;
+  text-align: center;
+  padding: 50px 20px;
+  font-family: "Arial", sans-serif;
+  position: relative;
+}
+
+.footer-text {
+  font-size: 25px;
+  font-weight: bold;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+  max-width: 800px;
+  margin: 0 auto 30px auto;
+  white-space: pre-wrap;
+  animation: grow 3s ease-in-out infinite;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes grow {
+  0% {
+    transform: scale(1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.copyright {
+  font-size: 14px;
+  margin-top: 20px;
+  color: #ccc;
+}
