@@ -1,25 +1,28 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
-require("dotenv").config();
 
+// Initialize Express app
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
 app.use(express.json());
 app.use(cors());
 
+// PostgreSQL Connection Pool
 const pool = new Pool({
-  connectionString: process.env.SUPABASE_URL,
+  connectionString: process.env.SUPABASE_DB_URL,
   ssl: { rejectUnauthorized: false },
 });
 
-app.get("/", async (req, res) => {
-  try {
-    const { rows } = await pool.query("SELECT NOW()");
-    res.json({ message: "Wyzo Backend Running...", time: rows[0].now });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// API Routes
+app.get("/", (req, res) => {
+  res.json({ message: "Wyzo Backend Running..." });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
