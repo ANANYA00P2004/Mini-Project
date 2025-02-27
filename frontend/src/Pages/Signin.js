@@ -1,91 +1,59 @@
+// signin.js (React Frontend)
 
 import React, { useState } from "react";
-import supabase from "../supabaseClient";
-
-import { FaGoogle } from "react-icons/fa";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./Login.css";
+import { createClient } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 import "./Signin.css";
 
-const SignInPage = () => {
+const supabase = createClient(
+  process.env.REACT_APP_SUPABASE_URL,
+  process.env.REACT_APP_SUPABASE_ANON_KEY
+);
+
+const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "email") setEmail(value);
-    else if (name === "password") setPassword(value);
+    if (name === "password") setPassword(value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await fetch("http://localhost:5000/signin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-
-      const data = await response.json();
-      if (response.ok) alert("Login successful!");
-      else alert(data.error);
+      if (error) throw error;
+      alert("Signed in successfully!");
+      navigate("/dashboard");
     } catch (error) {
-      alert("Login failed!");
+      alert(error.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
     try {
-        const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
-
-        if (error) {
-            alert(error.message);
-        } else {
-            alert("Redirecting to Google authentication...");
-
-            // Wait for authentication to complete
-            supabase.auth.onAuthStateChange(async (event, session) => {
-                if (event === "SIGNED_IN" && session) {
-                    const user = session.user;
-
-                    // Check if user already exists in the database
-                    const { data: existingUser, error: fetchError } = await supabase
-                        .from("Users")
-                        .select("*")
-                        .eq("email", user.email)
-                        .single();
-
-                    if (fetchError && fetchError.code !== "PGRST116") {
-                        console.error("Error fetching user:", fetchError);
-                        return;
-                    }
-
-                    // If user does not exist, insert into the Users table
-                    if (!existingUser) {
-                        const { error: insertError } = await supabase
-                            .from("Users")
-                            .insert([{ name: user.user_metadata.full_name, email: user.email, password: null }]);
-
-                        if (insertError) {
-                            console.error("Error inserting user:", insertError);
-                        }
-                    }
-                }
-            });
-        }
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + "/home" },
+      });
+      if (error) throw error;
     } catch (error) {
-        alert(error.message);
+      alert(error.message);
     }
-};
-
+  };
 
   return (
     <div className="signin-container">
       <div className="signin-background">
         <div className="signin-overlay">
           <h2 className="text1">Welcome back!!</h2>
-          <p className="text2">Enter the future of payments today:)</p>
+          <p className="text2">Enter the future of payments today :)</p>
         </div>
       </div>
 
@@ -130,7 +98,7 @@ const SignInPage = () => {
           </button>
 
           <p className="signin-footer">
-            Don't have an account? <a href="./sign-up">Sign up here</a>
+            Don't have an account? <a href="/sign-up">Sign up here</a>
           </p>
         </div>
       </div>
@@ -138,4 +106,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default SignIn;
