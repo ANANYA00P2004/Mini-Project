@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import supabase from "../supabaseClient"; // ✅ Remove curly braces
+import supabase from "../supabaseClient";
 
 import { FaGoogle } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -18,29 +19,66 @@ const SignInPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
 
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Sign-in successful!");
+    try {
+      const response = await fetch("http://localhost:5000/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) alert("Login successful!");
+      else alert(data.error);
+    } catch (error) {
+      alert("Login failed!");
     }
   };
 
   const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+    try {
+        const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
 
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Redirecting to Google authentication...");
+        if (error) {
+            alert(error.message);
+        } else {
+            alert("Redirecting to Google authentication...");
+
+            // Wait for authentication to complete
+            supabase.auth.onAuthStateChange(async (event, session) => {
+                if (event === "SIGNED_IN" && session) {
+                    const user = session.user;
+
+                    // Check if user already exists in the database
+                    const { data: existingUser, error: fetchError } = await supabase
+                        .from("Users")
+                        .select("*")
+                        .eq("email", user.email)
+                        .single();
+
+                    if (fetchError && fetchError.code !== "PGRST116") {
+                        console.error("Error fetching user:", fetchError);
+                        return;
+                    }
+
+                    // If user does not exist, insert into the Users table
+                    if (!existingUser) {
+                        const { error: insertError } = await supabase
+                            .from("Users")
+                            .insert([{ name: user.user_metadata.full_name, email: user.email, password: null }]);
+
+                        if (insertError) {
+                            console.error("Error inserting user:", insertError);
+                        }
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        alert(error.message);
     }
-  };
+};
+
 
   return (
     <div className="signin-container">
