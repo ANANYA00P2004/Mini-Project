@@ -1,94 +1,124 @@
 import React, { useState, useEffect } from "react";
-import Layout from "./Layout"; // Ensure Layout is imported
-import supabase from "../supabaseClient";
-import { FaPlus, FaTrash } from "react-icons/fa";
+import Layout from "./Layout";
 import "./FutureEvent.css";
 
-const FutureEvent = () => {
-  const [events, setEvents] = useState([]);
-  const [formVisible, setFormVisible] = useState(false);
-  const [newEvent, setNewEvent] = useState({
-    title: "",
-    date: "",
-    expected_amount: "",
-    description: "",
-  });
-  const [doubleClickedEvent, setDoubleClickedEvent] = useState(null);
+const API_URL = "http://localhost:5000/api/future-events";
 
-  const user_id = "your-user-id"; // Replace with actual user ID (from auth)
+const FutureEvent = ({ userId }) => {
+    const [events, setEvents] = useState([]);
+    const [formVisible, setFormVisible] = useState(false);
+    const [formData, setFormData] = useState({ title: "", date: "", expected_amount: "", description: "" });
+    const [pastEventId, setPastEventId] = useState(null); // Stores past event ID for deletion
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      const { data, error } = await supabase
-        .from("Future_Expenses")
-        .select("*")
-        .eq("user_id", user_id)
-        .order("date", { ascending: true });
+    // Fetch events on load
+    useEffect(() => {
+        fetch(`${API_URL}/${userId}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setEvents(data);
+                } else {
+                    setEvents([]); // Ensure events is always an array
+                }
+            })
+            .catch((err) => {
+                console.error("Error fetching events:", err);
+                setEvents([]); // Handle errors gracefully
+            });
+    }, [userId]);
 
-      if (error) console.error("Error fetching events:", error);
-      else setEvents(data);
+    // Handle form input changes
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
-    fetchEvents();
-  }, []);
 
-  const handleChange = (e) => {
-    setNewEvent({ ...newEvent, [e.target.name]: e.target.value });
-  };
+    // Save event
+    const saveEvent = async () => {
+      if (!formData.title || !formData.date || !formData.expected_amount || !formData.description) {
+          console.warn("❌ Missing fields, event not saved.");
+          return;
+      }
+  
+      console.log("📤 Sending data:", formData);
+  
+      try {
+          const response = await fetch("http://localhost:5000/api/future-events", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+          });
+  
+          const result = await response.json();
+          if (!response.ok) {
+              console.error("❌ Failed to save event:", result);
+              return;
+          }
+  
+          console.log("✅ Event saved successfully:", result);
+  
+          setEvents((prevEvents) => [result, ...prevEvents]);
+          setFormData({ title: "", date: "", expected_amount: "", description: "" });
+          setFormVisible(false);
+      } catch (error) {
+          console.error("❌ Error saving event:", error);
+      }
+    };
+  
+  
+    // Delete past event
+    const deleteEvent = () => {
+        if (!pastEventId) return;
 
-  const handleSave = async () => {
-    if (!newEvent.title || !newEvent.date || !newEvent.expected_amount) return;
-    const { data, error } = await supabase.from("Future_Expenses").insert([{ ...newEvent, user_id }]);
+        fetch(`${API_URL}/${pastEventId}`, { method: "DELETE" })
+            .then(() => {
+                setEvents(events.filter((event) => event.id !== pastEventId));
+                setPastEventId(null);
+            })
+            .catch((err) => console.error("Error deleting event:", err));
+    };
 
-    if (error) console.error("Error adding event:", error);
-    else {
-      setEvents([data[0], ...events]);
-      setNewEvent({ title: "", date: "", expected_amount: "", description: "" });
-      setFormVisible(false);
-    }
-  };
+    // Categorize events
+    const today = new Date().toISOString().split("T")[0];
+    const upcoming = events.filter((e) => e.date > today);
+    const todayEvents = events.filter((e) => e.date === today);
+    const past = events.filter((e) => e.date < today);
 
-  const handleDelete = async (id) => {
-    const { error } = await supabase.from("Future_Expenses").delete().eq("id", id);
-    if (error) console.error("Error deleting event:", error);
-    else setEvents(events.filter((event) => event.id !== id));
-  };
+    return (
+        <Layout>
+            <div className="future-events-container">
+                <h2>Future Events</h2>
+                <p>Plan ahead! Add future expenses and let us remind you while adjusting your budget automatically.</p>
 
-  return (
-    <Layout>
-      <div className="future-events">
-        <h1 className="main-heading">Future Events</h1>
-        <p className="description">Plan ahead! Add upcoming expenses, and we'll remind you while adjusting your budget.</p>
+                <div className="add-event">
+                    <h3>Add Event</h3>
+                    <button className="plus-button" onClick={() => setFormVisible(!formVisible)}>+</button>
+                </div>
 
-        <div className="add-event" onClick={() => setFormVisible(!formVisible)}>
-          <h2>ADD EVENT</h2>
-          <FaPlus className="add-icon" />
-        </div>
+                {formVisible && (
+                    <div className="event-form">
+                        <input type="text" name="title" placeholder="Event Title" value={formData.title} onChange={handleChange} />
+                        <input type="date" name="date" value={formData.date} onChange={handleChange} />
+                        <input type="number" name="expected_amount" placeholder="Expected Amount" value={formData.expected_amount} onChange={handleChange} />
+                        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange}></textarea>
+                        <button onClick={saveEvent} disabled={!formData.title || !formData.date || !formData.expected_amount || !formData.description}>Save</button>
+                    </div>
+                )}
 
-        {formVisible && (
-          <div className="event-form">
-            <input type="text" name="title" placeholder="Event Title" onChange={handleChange} value={newEvent.title} />
-            <input type="date" name="date" onChange={handleChange} value={newEvent.date} />
-            <input type="number" name="expected_amount" placeholder="Expected Amount" onChange={handleChange} value={newEvent.expected_amount} />
-            <textarea name="description" placeholder="Description" onChange={handleChange} value={newEvent.description}></textarea>
-            <button onClick={handleSave}>Save</button>
-          </div>
-        )}
+                {events.length === 0 && <p className="no-events">No future events.</p>}
 
-        <div className="events-list">
-          {events.length > 0 ? (
-            events.map((event) => (
-              <div key={event.id} className="event-item">
-                {event.title} - ₹{event.expected_amount}
-                <FaTrash onClick={() => handleDelete(event.id)} className="delete-icon" />
-              </div>
-            ))
-          ) : (
-            <p>No upcoming events.</p>
-          )}
-        </div>
-      </div>
-    </Layout>
-  );
+                {upcoming.length > 0 && <div className="events-row upcoming">Upcoming Events: {upcoming.map((e) => <span key={e.id}>{e.title}</span>)}</div>}
+                {todayEvents.length > 0 && <div className="events-row today">Today's Events: {todayEvents.map((e) => <span key={e.id}>{e.title}</span>)}</div>}
+                {past.length > 0 && (
+                    <div className="events-row past">
+                        Past Events: {past.map((e) => (
+                            <span key={e.id} onDoubleClick={() => setPastEventId(e.id)}>{e.title}</span>
+                        ))}
+                        {pastEventId && <button onClick={deleteEvent}>Delete</button>}
+                    </div>
+                )}
+            </div>
+        </Layout>
+    );
 };
 
 export default FutureEvent;
