@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import supabase from "../supabaseClient"; // ✅ Remove curly braces
-
+import { useNavigate } from "react-router-dom"; // ✅ Import useNavigate
+import supabase from "../supabaseClient";
 import { FaGoogle } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Login.css";
@@ -9,6 +9,7 @@ import "./Signin.css";
 const SignInPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // ✅ Initialize navigate function
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,6 +28,7 @@ const SignInPage = () => {
       alert(error.message);
     } else {
       alert("Sign-in successful!");
+      navigate("/home"); // ✅ Redirect to /home after success
     }
   };
 
