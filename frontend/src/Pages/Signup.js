@@ -77,7 +77,9 @@ const SignUp = () => {
   const [user, setUser] = useState(null);
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+      const { error } = await supabase.auth.signInWithOAuth({ provider: "google",
+        options: { redirectTo: window.location.origin+'/home' }, // No unnecessary redirection
+      });
       if (error) throw error;
   
       // Listen for session changes (Only Once)
@@ -103,7 +105,7 @@ const SignUp = () => {
           }
   
           // Navigate after authentication
-          navigate("/sign-in");
+          navigate("/home");
         }
       });
   
