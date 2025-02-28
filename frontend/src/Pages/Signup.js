@@ -36,23 +36,22 @@ const SignUp = () => {
     }
 
     try {
-      // Step 1: Check if user already exists in "Users" table
       const { data: existingUser, error: checkError } = await supabase
         .from("Users")
         .select("id")
         .eq("email", email)
-        .single(); // Retrieves a single user if found
-  
-      if (checkError && checkError.code !== "PGRST116") { 
-        // "PGRST116" is Supabase's error code for "no rows found"
+        .single();
+
+      if (checkError && checkError.code !== "PGRST116") {
         throw checkError;
       }
-  
+
       if (existingUser) {
         alert("User already exists! Please log in.");
         navigate("/sign-in");
         return;
       }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -74,64 +73,49 @@ const SignUp = () => {
       alert(error.message);
     }
   };
-  const [user, setUser] = useState(null);
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: "google",
-        options: { redirectTo: window.location.origin+'/home' }, // No unnecessary redirection
-      });
-      if (error) throw error;
+
+  const signInWithGoogle = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + "/sign-up", // Stay on signup page
+      },
+    });
   
-      // Listen for session changes (Only Once)
-      const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-        if (session) {
-          const user = session.user;
-          const email = user.email;
-          const name = user.user_metadata.full_name;
-  
-          // Check if user exists in DB
-          const { data: existingUser, error: checkError } = await supabase
-            .from("Users")
-            .select("id")
-            .eq("email", email)
-            .single();
-  
-          if (!existingUser) {
-            // Insert new user into DB
-            await supabase.from("Users").insert({ id: user.id, name, email, password: null });
-            alert("Registration successful!");
-          } else {
-            alert("User already exists! Redirecting to login.");
-          }
-  
-          // Navigate after authentication
-          navigate("/home");
-        }
-      });
-  
-      // Cleanup Listener
-      return () => {
-        authListener?.unsubscribe();
-      };
-    } catch (error) {
-      console.error("Error:", error.message);
-      alert("Error: " + error.message);
+    if (error) {
+      console.error("Google Sign-In Error:", error);
     }
   };
+  
+  // Fetch user data & store in DB after OAuth redirect
+  const fetchAndStoreUser = async () => {
+    const { data: userData, error } = await supabase.auth.getUser();
+  
+    if (error || !userData?.user) {
+      console.error("Error fetching user data:", error);
+      return;
+    }
+  
+    const { email, user_metadata } = userData.user;
+    const name = user_metadata?.full_name;
+  
+    // Store user data in the Supabase database
+    const { error: insertError } = await supabase
+      .from("Users")
+      .insert([{ name, email, password: null }]);
+  
+    if (insertError) {
+      console.error("Error storing user data:", insertError);
+    } else {
+      alert("Registration successful!"); // Show success message
+    }
+  };
+  navigate('/sign-in')
+  // Run only after OAuth redirects back
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        setUser(session.user);
-        console.log("User is logged in:", session.user);
-      } else {
-        console.log("No active session.");
-      }
-    };
-
-    checkSession();
+    fetchAndStoreUser();
   }, []);
+  
   return (
     <div className="signup-container">
       <div className="signup-left">
@@ -146,7 +130,7 @@ const SignUp = () => {
           <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
           <button type="submit" className="signup-button">Sign Up</button>
         </form>
-        <button onClick={handleGoogleSignIn} className="signup-google-button">
+        <button onClick={signInWithGoogle} className="signup-google-button">
           <img src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png" alt="Google Logo" />
           Sign up with Google
         </button>

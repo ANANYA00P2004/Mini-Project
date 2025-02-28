@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import "../Pages/Signin.css";
 import { useNavigate } from "react-router-dom";
@@ -34,90 +34,68 @@ const SignIn = () => {
       alert(error.message);
     }
   };
+  
 
-  const handleGoogleSignIn = async () => {
-    const { user, error } = await supabase.auth.signInWithOAuth({ provider: "google" });
-    if (error) {
-      alert(error.message);
-    } else {
-      const { data } = await supabase.from("Users").select("*").eq("email", user.email);
-      if (data.length === 0) {
-        alert("User not found. Please sign up first.");
-        return;
-      }
-      alert("Login successful!");
-      navigate("/home");
-    }
-  };
+const signInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin + "/sign-in", // Redirect to sign-in after authentication
+    },
+  });
 
-  // const handleSignIn = async (e) => {
-  //   e.preventDefault();
+  if (error) {
+    console.error("Google Sign-In Error:", error);
+  } else {
+    localStorage.setItem("googleSignInTriggered", "true"); // Set flag to track sign-in
+  }
+};
 
-  //   try {
-  //     // Authenticate with Supabase
-  //     const { data, error } = await supabase.auth.signInWithPassword({
-  //       email,
-  //       password,
-  //     });
+// Fetch user data & check if registered
+const fetchAndCheckUser = async () => {
+  const { data: userData, error } = await supabase.auth.getUser();
 
-  //     if (error) throw error;
+  if (error || !userData?.user) {
+    console.error("Error fetching user data:", error);
+    return;
+  }
 
-  //     alert("Sign-in successful!");
+  const { email, user_metadata } = userData.user;
+  const name = user_metadata?.full_name;
 
-  //     // Send sign-in request to backend for verification
-  //     const response = await fetch("http://localhost:5000/signin", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ email, password }),
-  //     });
+  // Check if the user exists in the database
+  const { data: existingUser, error: checkError } = await supabase
+    .from("Users")
+    .select("id")
+    .eq("email", email)
+    .single();
 
-  //     const result = await response.json();
-  //     if (response.ok) {
-  //       alert("User authenticated successfully!");
-  //     } else {
-  //       alert(result.error);
-  //     }
-  //   } catch (error) {
-  //     alert(error.message);
-  //   }
-  // };
+  if (checkError && checkError.code !== "PGRST116") {
+    console.error("Error checking user in database:", checkError);
+    return;
+  }
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     const { data, error } = await supabase.auth.signInWithOAuth({
-  //       provider: "google",
-  //     });
+  if (existingUser) {
+    alert("Login successful!");
+    localStorage.removeItem("googleSignInTriggered"); // Clear flag after successful login
+    navigate("/home");
+  } else {
+    alert("User not found. Please sign up.");
+    localStorage.removeItem("googleSignInTriggered"); // Clear flag if sign-up is needed
+    //navigate("/sign-up");
+  }
+};
 
-  //     if (error) throw error;
-  //     alert("Redirecting to Google authentication...");
+// Run only after OAuth redirects back & if sign-in was triggered
+useEffect(() => {
+  const signInTriggered = localStorage.getItem("googleSignInTriggered");
+  if (signInTriggered) {
+    fetchAndCheckUser();
+  }
+}, []);
 
-      // Check when the user is authenticated
-      // supabase.auth.onAuthStateChange(async (event, session) => {
-      //   if (event === "SIGNED_IN" && session) {
-      //     const user = session.user;
 
-          // Send user details to backend to check/store in database
-  //         const response = await fetch("http://localhost:5000/google-auth", {
-  //           method: "POST",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({
-  //             name: user.user_metadata?.full_name || "Unknown",
-  //             email: user.email,
-  //           }),
-  //         });
 
-  //         const result = await response.json();
-  //         if (response.ok) {
-  //           alert("Logged in with Google and verified in database!");
-  //         } else {
-  //           alert(result.error);
-  //         }
-  //       }
-  //     });
-  //   } catch (error) {
-  //     alert(error.message);
-  //   }
-  // };
 
   return (
     <div className="signin-container">
@@ -159,7 +137,7 @@ const SignIn = () => {
 
           <div className="signin-divider">Or sign in with</div>
 
-          <button onClick={handleGoogleSignIn} className="btn-google">
+          <button onClick={signInWithGoogle} className="btn-google">
             <img
               alt="Google Logo"
               src="https://cdn1.iconfinder.com/data/icons/google-s-logo/150/Google_Icons-09-512.png"
