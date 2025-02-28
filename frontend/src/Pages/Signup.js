@@ -109,8 +109,9 @@ const SignUp = () => {
     } else {
       alert("Registration successful!"); // Show success message
     }
+    //navigate('/sign-in')
   };
-  navigate('/sign-in')
+  
   // Run only after OAuth redirects back
   useEffect(() => {
     fetchAndStoreUser();
