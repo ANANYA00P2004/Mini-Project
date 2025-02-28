@@ -36,64 +36,69 @@ const SignIn = () => {
   };
   
 
-const signInWithGoogle = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: window.location.origin + "/sign-in", // Redirect to sign-in after authentication
-    },
-  });
-
-  if (error) {
-    console.error("Google Sign-In Error:", error);
-  } else {
-    localStorage.setItem("googleSignInTriggered", "true"); // Set flag to track sign-in
-  }
-};
-
-// Fetch user data & check if registered
-const fetchAndCheckUser = async () => {
-  const { data: userData, error } = await supabase.auth.getUser();
-
-  if (error || !userData?.user) {
-    console.error("Error fetching user data:", error);
-    return;
-  }
-
-  const { email, user_metadata } = userData.user;
-  const name = user_metadata?.full_name;
-
-  // Check if the user exists in the database
-  const { data: existingUser, error: checkError } = await supabase
-    .from("Users")
-    .select("id")
-    .eq("email", email)
-    .single();
-
-  if (checkError && checkError.code !== "PGRST116") {
-    console.error("Error checking user in database:", checkError);
-    return;
-  }
-
-  if (existingUser) {
-    alert("Login successful!");
-    localStorage.removeItem("googleSignInTriggered"); // Clear flag after successful login
-    navigate("/home");
-  } else {
-    alert("User not found. Please sign up.");
-    localStorage.removeItem("googleSignInTriggered"); // Clear flag if sign-up is needed
-    //navigate("/sign-up");
-  }
-};
-
-// Run only after OAuth redirects back & if sign-in was triggered
-useEffect(() => {
-  const signInTriggered = localStorage.getItem("googleSignInTriggered");
-  if (signInTriggered) {
-    fetchAndCheckUser();
-  }
-}, []);
-
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/sign-in", // Redirect to sign-in after authentication
+      },
+    });
+  
+    if (error) {
+      console.error("Google Sign-In Error:", error);
+    } else {
+      localStorage.setItem("googleSignInTriggered", "true"); // Set flag to track sign-in
+    }
+  };
+  
+  // Fetch user data, check if registered, and sign out if not found
+  const fetchAndCheckUser = async () => {
+    const { data: userData, error } = await supabase.auth.getUser();
+  
+    if (error || !userData?.user) {
+      console.error("Error fetching user data:", error);
+      return;
+    }
+  
+    const { email, user_metadata } = userData.user;
+    const name = user_metadata?.full_name;
+  
+    // Check if the user exists in the database
+    const { data: existingUser, error: checkError } = await supabase
+      .from("Users")
+      .select("id")
+      .eq("email", email)
+      .single();
+  
+    if (checkError && checkError.code !== "PGRST116") {
+      console.error("Error checking user in database:", checkError);
+      return;
+    }
+  
+    if (existingUser) {
+      alert("Login successful!");
+      localStorage.removeItem("googleSignInTriggered"); // Clear flag after successful login
+      navigate("/home");
+    } else {
+      alert("User not found. Please sign up.");
+      localStorage.removeItem("googleSignInTriggered"); // Clear flag if sign-up is needed
+  
+      // **Sign out the unregistered user**
+      await supabase.auth.signOut();
+  
+      // Navigate to sign-up page
+      navigate("/sign-up");
+    }
+  };
+  
+  // Run only after OAuth redirects back & if sign-in was triggered
+  useEffect(() => {
+    const signInTriggered = localStorage.getItem("googleSignInTriggered");
+    if (signInTriggered) {
+      fetchAndCheckUser();
+    }
+  }, []);
+  
 
 
 
