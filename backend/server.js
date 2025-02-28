@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
+const authRoutes = require("./src/routes/AuthRoutes");
 const futureEventRoutes = require("./src/routes/FutureEventRoute"); // Import future event routes
 
 // Initialize Express app
@@ -11,7 +12,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 app.use(cors());
-
+app.use("/api/auth", authRoutes);
 // PostgreSQL Connection Pool (for direct PostgreSQL usage, though Supabase is preferred)
 const pool = new Pool({
   connectionString: process.env.SUPABASE_DB_URL,
