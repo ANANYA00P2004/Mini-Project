@@ -1,9 +1,7 @@
-// signin.js (React Frontend)
-
 import React, { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import "../Pages/Signin.css";
 import { useNavigate } from "react-router-dom";
-import "./Signin.css";
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
@@ -18,35 +16,108 @@ const SignIn = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "email") setEmail(value);
-    if (name === "password") setPassword(value);
+    else if (name === "password") setPassword(value);
   };
-
-  const handleSubmit = async (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      alert("Signed in successfully!");
-      navigate("/dashboard");
+      const { data, error } = await supabase.from("Users").select("*").eq("email", email);
+      if (data.length === 0) {
+        alert("User not found. Please sign up first.");
+        return;
+      }
+      const { user, session, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
+      alert("Login successful!");
+      navigate("/home");
     } catch (error) {
       alert(error.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin + "/home" },
-      });
-      if (error) throw error;
-    } catch (error) {
+    const { user, error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    if (error) {
       alert(error.message);
+    } else {
+      const { data } = await supabase.from("Users").select("*").eq("email", user.email);
+      if (data.length === 0) {
+        alert("User not found. Please sign up first.");
+        return;
+      }
+      alert("Login successful!");
+      navigate("/home");
     }
   };
+
+  // const handleSignIn = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     // Authenticate with Supabase
+  //     const { data, error } = await supabase.auth.signInWithPassword({
+  //       email,
+  //       password,
+  //     });
+
+  //     if (error) throw error;
+
+  //     alert("Sign-in successful!");
+
+  //     // Send sign-in request to backend for verification
+  //     const response = await fetch("http://localhost:5000/signin", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email, password }),
+  //     });
+
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       alert("User authenticated successfully!");
+  //     } else {
+  //       alert(result.error);
+  //     }
+  //   } catch (error) {
+  //     alert(error.message);
+  //   }
+  // };
+
+  // const handleGoogleSignIn = async () => {
+  //   try {
+  //     const { data, error } = await supabase.auth.signInWithOAuth({
+  //       provider: "google",
+  //     });
+
+  //     if (error) throw error;
+  //     alert("Redirecting to Google authentication...");
+
+      // Check when the user is authenticated
+      // supabase.auth.onAuthStateChange(async (event, session) => {
+      //   if (event === "SIGNED_IN" && session) {
+      //     const user = session.user;
+
+          // Send user details to backend to check/store in database
+  //         const response = await fetch("http://localhost:5000/google-auth", {
+  //           method: "POST",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({
+  //             name: user.user_metadata?.full_name || "Unknown",
+  //             email: user.email,
+  //           }),
+  //         });
+
+  //         const result = await response.json();
+  //         if (response.ok) {
+  //           alert("Logged in with Google and verified in database!");
+  //         } else {
+  //           alert(result.error);
+  //         }
+  //       }
+  //     });
+  //   } catch (error) {
+  //     alert(error.message);
+  //   }
+  // };
 
   return (
     <div className="signin-container">
@@ -63,7 +134,8 @@ const SignIn = () => {
             <h3 className="signin-title">LOGIN</h3>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          {/* FIXED: Corrected form onSubmit reference */}
+          <form onSubmit={handleSignIn}>
             <input
               type="email"
               className="signin-input"
