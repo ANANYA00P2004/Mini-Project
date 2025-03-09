@@ -16,10 +16,28 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
+  const defaultCategories = [
+    "Shopping",
+    "Groceries",
+    "Transport",
+    "Entertainment",
+    "Food",
+    "Rent",
+    "Education",
+  ];
+
   const validatePassword = (password) => {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
     return regex.test(password);
+  };
+
+  const insertDefaultCategories = async (userId) => {
+    const categoryData = defaultCategories.map((label) => ({
+      user_id: userId,
+      label,
+    }));
+    await supabase.from("Categories").insert(categoryData);
   };
 
   const handleSignup = async (e) => {
@@ -59,13 +77,16 @@ const SignUp = () => {
       });
       if (error) throw error;
 
+      const userId = data.user.id;
+
       const { error: insertError } = await supabase.from("Users").insert({
-        id: data.user.id,
+        id: userId,
         name,
         email,
-        password,
       });
       if (insertError) throw insertError;
+
+      await insertDefaultCategories(userId);
 
       alert("Registration successful!");
       navigate("/sign-in");
@@ -75,67 +96,61 @@ const SignUp = () => {
   };
 
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + "/sign-up", // Stay on signup page
+        redirectTo: window.location.origin + "/sign-up",
       },
     });
-  
+
     if (error) {
       console.error("Google Sign-In Error:", error);
     }
   };
-  
-  // Fetch user data & store in DB after OAuth redirect (only if new user)
+
   const fetchAndStoreUser = async () => {
     const { data: userData, error } = await supabase.auth.getUser();
-  
+
     if (error || !userData?.user) {
       console.error("Error fetching user data:", error);
       return;
     }
-  
-    const { email, user_metadata } = userData.user;
-    const name = user_metadata?.full_name || "New User"; // Default if name is missing
-  
-    // Check if user already exists
+
+    const { id: userId, email, user_metadata } = userData.user;
+    const name = user_metadata?.full_name || "New User";
+
     const { data: existingUser, error: checkError } = await supabase
       .from("Users")
       .select("id")
       .eq("email", email)
       .single();
-  
+
     if (checkError && checkError.code !== "PGRST116") {
       console.error("Error checking user in database:", checkError);
       return;
     }
-  
+
     if (existingUser) {
       console.log("User already exists. No need to insert.");
-      return; // Prevent automatic sign-up
+      return;
     }
-  
-    // Insert new user if not found
+
     const { error: insertError } = await supabase
       .from("Users")
-      .insert([{ name, email, password: null }]);
-  
-    if (insertError) {
-      console.error("Error storing user data:", insertError);
-    } else {
+      .insert([{ id: userId, name, email }]);
+
+    if (!insertError) {
+      await insertDefaultCategories(userId);
       alert("Registration successful!");
+    } else {
+      console.error("Error storing user data:", insertError);
     }
   };
-  
-  // Run only after OAuth redirects back
+
   useEffect(() => {
     fetchAndStoreUser();
   }, []);
-  
-  
-  
-  
+
   return (
     <div className="signup-container">
       <div className="signup-left">
