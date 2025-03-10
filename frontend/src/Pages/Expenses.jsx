@@ -363,14 +363,14 @@ export default function Expenses() {
           </div>
           <div className="priority-section">
             <div className="card priority-card" onClick={() => setShowPriorityPopup(true)}>
-              <h3>Priority</h3>
-              <div className="toggle-button">Toggle</div>
+              <h3>Monthly Expenses</h3>
+              <p className="amount">${financialData.savings}</p>
             </div>
           </div>
         </div>
 
         {/* Priority Categories Display */}
-        {priorityCategories.length > 0 && (
+        {/* {priorityCategories.length > 0 && (
           <div className="priority-categories">
             <h3>Priority Categories</h3>
             <div className="priority-tags">
@@ -385,7 +385,7 @@ export default function Expenses() {
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Priority Popup */}
         {showPriorityPopup && (
@@ -418,11 +418,11 @@ export default function Expenses() {
         <h2>Add Your Expenses</h2>
         <div className="expense-cards">
           <div className="card add-card" onClick={() => setShowExpenseForm(true)}>
-            <Plus size={40} />
+            <Minus size={40} />
             <p>Add Expense</p>
           </div>
           <div className="card minus-card" onClick={() => setShowIncomeForm(true)}>
-            <Minus size={40} />
+            <Plus size={40} />
             <p>Add Income</p>
           </div>
         </div>
