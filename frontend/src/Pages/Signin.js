@@ -1,7 +1,7 @@
-import React, { useState ,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
-import "../Pages/Signin.css";
 import { useNavigate } from "react-router-dom";
+import "../Pages/Signin.css";
 
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
@@ -18,89 +18,102 @@ const SignIn = () => {
     if (name === "email") setEmail(value);
     else if (name === "password") setPassword(value);
   };
+
+  // Handle sign-in with email and password
   const handleSignIn = async (e) => {
     e.preventDefault();
     try {
-      const { data, error } = await supabase.from("Users").select("*").eq("email", email);
-      if (data.length === 0) {
+      // Fetch user ID from database
+      const { data, error } = await supabase
+        .from("Users")
+        .select("id")
+        .eq("email", email)
+        .single();
+
+      if (error || !data) {
         alert("User not found. Please sign up first.");
         return;
       }
-      const { user, session, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      // Authenticate user
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
       if (signInError) throw signInError;
+
+      // Store user ID in localStorage
+      localStorage.setItem("userId", data.id);
+
       alert("Login successful!");
       navigate("/home");
     } catch (error) {
       alert(error.message);
     }
   };
-  
 
+  // Handle Google sign-in
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: window.location.origin + "/sign-in", // Redirect to sign-in after authentication
+        redirectTo: window.location.origin + "/sign-in",
       },
     });
-  
+
     if (error) {
       console.error("Google Sign-In Error:", error);
     } else {
-      localStorage.setItem("googleSignInTriggered", "true"); // Set flag to track sign-in
+      localStorage.setItem("googleSignInTriggered", "true"); // Track sign-in attempt
     }
   };
-  
-  // Fetch user data, check if registered, and sign out if not found
+
+  // Fetch and check user after Google authentication
   const fetchAndCheckUser = async () => {
     const { data: userData, error } = await supabase.auth.getUser();
-  
+
     if (error || !userData?.user) {
       console.error("Error fetching user data:", error);
       return;
     }
-  
-    const { email, user_metadata } = userData.user;
-    const name = user_metadata?.full_name;
-  
-    // Check if the user exists in the database
+
+    const { email } = userData.user;
+
+    // Check if user exists in database
     const { data: existingUser, error: checkError } = await supabase
       .from("Users")
       .select("id")
       .eq("email", email)
       .single();
-  
+
     if (checkError && checkError.code !== "PGRST116") {
       console.error("Error checking user in database:", checkError);
       return;
     }
-  
+
     if (existingUser) {
+      localStorage.setItem("userId", existingUser.id);
       alert("Login successful!");
-      localStorage.removeItem("googleSignInTriggered"); // Clear flag after successful login
+      localStorage.removeItem("googleSignInTriggered");
       navigate("/home");
     } else {
       alert("User not found. Please sign up.");
-      localStorage.removeItem("googleSignInTriggered"); // Clear flag if sign-up is needed
-  
-      // **Sign out the unregistered user**
+      localStorage.removeItem("googleSignInTriggered");
+
+      // Sign out unregistered user
       await supabase.auth.signOut();
-  
-      // Navigate to sign-up page
       navigate("/sign-up");
     }
   };
-  
-  // Run only after OAuth redirects back & if sign-in was triggered
+
+  // Check if Google sign-in was triggered and verify user
   useEffect(() => {
     const signInTriggered = localStorage.getItem("googleSignInTriggered");
     if (signInTriggered) {
       fetchAndCheckUser();
     }
   }, []);
-  
-
-
 
   return (
     <div className="signin-container">
@@ -117,7 +130,6 @@ const SignIn = () => {
             <h3 className="signin-title">LOGIN</h3>
           </div>
 
-          {/* FIXED: Corrected form onSubmit reference */}
           <form onSubmit={handleSignIn}>
             <input
               type="email"

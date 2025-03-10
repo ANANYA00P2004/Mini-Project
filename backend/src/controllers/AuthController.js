@@ -1,4 +1,4 @@
-const supabase = require("../../supabaseClient.js");
+const supabase = require("../supabaseClient.js");
 
 // Default categories to add for each new user
 const DEFAULT_CATEGORIES = [
