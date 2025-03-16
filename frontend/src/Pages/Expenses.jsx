@@ -354,11 +354,11 @@ export default function Expenses() {
           <div className="financial-cards">
             <div className="card income-card">
               <h3>Total Income</h3>
-              <p className="amount">${financialData.income}</p>
+              <p className="amount">₹{financialData.income}</p>
             </div>
             <div className="card savings-card">
               <h3>Total Savings</h3>
-              <p className="amount">${financialData.savings}</p>
+              <p className="amount">₹{financialData.savings}</p>
             </div>
           </div>
           <div className="priority-section">
