@@ -7,6 +7,7 @@ const { Pool } = require("pg");
 const authRoutes = require("./src/routes/AuthRoutes");
 const futureEventRoutes = require("./src/routes/FutureEventRoute"); // Import future event routes
 const BudgetPlan = require("./src/routes/BudgetRoutes")
+//const Expenses = require("./src/routes/ExpensesRoute")
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/futureevents", futureEventRoutes);
 app.use("/api/BudgetPlan",BudgetPlan)
+//app.use("/api/Expenses",Expenses)
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

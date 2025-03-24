@@ -6,21 +6,36 @@ const BudgetController = {
   // Get current user
   async getCurrentUser(req, res) {
     try {
-      
-      const { data, error } = await supabase
-        .from('Users')
-        .select('id')
-        .limit(1)
-        .single();
+      const userId = req.query.userId; // Get userId from request query
+    if (!userId) return res.status(400).json({ error: "User ID is required" });
 
-      if (error) throw error;
+    const { data, error } = await supabase
+      .from("Future_Expenses")
+      .select("*")
+      .eq("user_id", userId)
+      .order("date", { ascending: true });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+},
+// };
+//         .from('Users')
+//         .select('id')
+//         .eq('id', newId)
+//         .limit(1)
+//         .single();
+
+//       if (error) throw error;
       
-      res.status(200).json(data);
-    } catch (error) {
-      console.error('Error getting current user:', error);
-      res.status(500).json({ error: error.message });
-    }
-  },
+//       res.status(200).json(data);
+//     } catch (error) {
+//       console.error('Error getting current user:', error);
+//       res.status(500).json({ error: error.message });
+//     }
+//   },
 // Create a new budget record
 // Create a new budget record
 async createBudget(req, res) {
