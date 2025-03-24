@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import "../Pages/Signin.css";
 
+let expID = null;
+
 const supabase = createClient(
   process.env.REACT_APP_SUPABASE_URL,
   process.env.REACT_APP_SUPABASE_ANON_KEY
@@ -45,6 +47,7 @@ const SignIn = () => {
 
       // Store user ID in localStorage
       localStorage.setItem("userId", data.id);
+      expID = data.id;
 
       alert("Login successful!");
       navigate("/home");
@@ -78,7 +81,8 @@ const SignIn = () => {
       return;
     }
 
-    const { email } = userData.user;
+    const { email, newId } = userData.user;
+    expID = newId;
 
     // Check if user exists in database
     const { data: existingUser, error: checkError } = await supabase

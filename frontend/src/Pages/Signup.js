@@ -78,6 +78,7 @@ const SignUp = () => {
       if (error) throw error;
 
       const userId = data.user.id;
+      
 
       const { error: insertError } = await supabase.from("Users").insert({
         id: userId,
