@@ -1,54 +1,68 @@
 .wyzo-home-container {
-    padding: 20px;
-    background-color: #f4f4f9;
-    color: #0A0F5B;
-    font-family: 'Arial', sans-serif;
+  padding: 20px;
+}
+
+.wyzo-home-title {
+  text-align: left;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Grid Layout */
+.wyzo-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+  gap: 20px;
+}
+
+/* Box Styling */
+.wyzo-home-box {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress Bar */
+.wyzo-home-progress {
+  height: 10px;
+  width: 100%;
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.wyzo-home-progress-bar {
+  height: 100%;
+  background: #0A0F5B; /* Theme color */
+}
+
+/* Make Budget Overview span full width */
+.budget-overview {
+  grid-column: span 2; /* Adjusts width on larger screens */
+}
+
+/* Category-Wise Spending */
+.wyzo-home-chart-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.wyzo-home-chart-item {
+  width: 100%;
+  max-width: 250px;
+  text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .budget-overview {
+    grid-column: span 1;
   }
-  
-  .wyzo-home-title {
-    font-size: 24px;
-    margin-bottom: 20px;
+
+  .wyzo-home-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .wyzo-home-box {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .wyzo-home-number {
-    font-size: 28px;
-    font-weight: bold;
-    color: #ff4d4d;
-  }
-  
-  .wyzo-home-progress {
-    background: #ddd;
-    border-radius: 5px;
-    height: 20px;
-  }
-  
-  .wyzo-home-progress-bar {
-    background: #0A0F5B;
-    height: 100%;
-    border-radius: 5px;
-  }
-  
-  .wyzo-home-chart-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-  }
-  
-  .wyzo-home-chart-item {
-    width: 30%;
-    text-align: center;
-  }
-  
-  .wyzo-home-box ul {
-    list-style: none;
-    padding: 0;
-  }
-  
+}
