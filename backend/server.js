@@ -8,6 +8,7 @@ const authRoutes = require("./src/routes/AuthRoutes");
 const futureEventRoutes = require("./src/routes/FutureEventRoute"); // Import future event routes
 const homeRoutes = require("./src/routes/HomeRoute");
 const BudgetPlan = require("./src/routes/BudgetRoutes")
+//const Expenses = require("./src/routes/ExpensesRoute")
 
 const app = express();
 const PORT = process.env.PORT || 5000;

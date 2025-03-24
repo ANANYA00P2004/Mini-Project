@@ -144,7 +144,7 @@ const categoryIcons = {
 
 const BudgetPlan = () => {
   // User state
-  const [userId, setUserId] = useState('');
+  const userId = localStorage.getItem("userId");
 
   // Budget state
   const [monthlyIncome, setMonthlyIncome] = useState(0);
@@ -170,22 +170,22 @@ const BudgetPlan = () => {
   const [showNewRecurring, setShowNewRecurring] = useState(false);
 
   // Fetch user ID and data on component mount
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        const user = await budgetService.getCurrentUser();
-        if (user) {
-          setUserId(user.id);
-        } else {
-          console.error("User not authenticated");
-        }
-      } catch (error) {
-        console.error("Authentication error:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const getCurrentUser = async () => {
+  //     try {
+  //       const user = await budgetService.getCurrentUser();
+  //       if (user) {
+  //         setUserId(user.id);
+  //       } else {
+  //         console.error("User not authenticated");
+  //       }
+  //     } catch (error) {
+  //       console.error("Authentication error:", error);
+  //     }
+  //   };
     
-    getCurrentUser();
-  }, []);
+  //   getCurrentUser();
+  // }, []);
 
   // Fetch data when userId is available
   useEffect(() => {

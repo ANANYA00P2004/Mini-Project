@@ -1,24 +1,29 @@
-// routes/ExpenseRoutes.js
-const express = require("express");
-const {
-  addDefaultCategories,
-  createCategory,
-  addExpense,
-  addPriority,
-} = require("../controllers/ExpenseController");
-
+const express = require('express');
 const router = express.Router();
+const ExpensesController = require('../controllers/ExpensesController');
 
-// Route to add default categories for a user
-router.post("/categories/default", addDefaultCategories);
+// Middleware to verify JWT token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Missing or invalid authorization token' });
+  }
+  
+  // Token validation is handled in the controller
+  next();
+};
 
-// Route to create a new category
-router.post("/categories", createCategory);
+// Budget routes
+router.get('/budget', authenticateToken, ExpensesController.getBudgetData);
 
-// Route to add an expense
-router.post("/expenses", addExpense);
+// Categories routes
+router.get('/categories', authenticateToken, ExpensesController.getCategories);
 
-// Route to assign a priority to a category
-router.post("/priority", addPriority);
+// Transactions routes
+router.get('/transactions', authenticateToken, ExpensesController.getTransactions);
+router.post('/transactions', authenticateToken, ExpensesController.addTransaction);
+router.put('/transactions/:id', authenticateToken, ExpensesController.updateTransaction);
+router.delete('/transactions/:id', authenticateToken, ExpensesController.deleteTransaction);
 
 module.exports = router;
