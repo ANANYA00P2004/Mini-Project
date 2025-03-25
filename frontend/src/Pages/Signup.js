@@ -22,7 +22,6 @@ const SignUp = () => {
     "Transport",
     "Entertainment",
     "Food",
-    "Rent",
     "Education",
   ];
 
