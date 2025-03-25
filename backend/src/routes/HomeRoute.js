@@ -1,8 +1,8 @@
 const express = require("express");
-const HomeController = require("../controllers/HomeController");
+const { getDashboardData } = require("../controllers/HomeController");
 
 const router = express.Router();
 
-router.get("/:userId", HomeController.getDashboardData);
+router.get("/", getDashboardData);
 
 module.exports = router;

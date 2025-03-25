@@ -6,13 +6,10 @@ const { Pool } = require("pg");
 
 const authRoutes = require("./src/routes/AuthRoutes");
 const futureEventRoutes = require("./src/routes/FutureEventRoute"); // Import future event routes
-<<<<<<< HEAD
 const homeRoutes = require("./src/routes/HomeRoute");
-=======
 const BudgetPlan = require("./src/routes/BudgetRoutes")
 //const Expenses = require("./src/routes/ExpensesRoute")
 
->>>>>>> 0d02d7377d0d75b1929551f6b796f18fb58c06c4
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -34,11 +31,8 @@ app.get("/", (req, res) => {
 // Register Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/futureevents", futureEventRoutes);
-<<<<<<< HEAD
 app.use("/api/home", homeRoutes);
-=======
 app.use("/api/BudgetPlan",BudgetPlan)
->>>>>>> 0d02d7377d0d75b1929551f6b796f18fb58c06c4
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
