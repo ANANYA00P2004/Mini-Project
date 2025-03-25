@@ -83,6 +83,7 @@ const SignUp = () => {
         id: userId,
         name,
         email,
+        password,
       });
       if (insertError) throw insertError;
 
