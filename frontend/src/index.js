@@ -22,7 +22,7 @@ const Root = () => {
         <Route path="/plan" element={<BudgetPlan />} />
         <Route path="/futureevents" element={<FutureEvents />} /> 
         <Route path="/home" element={<Home/>}/>
-        <Route path ="/profile" element={<Profile/>} />
+        <Route path ="/home" element={<Profile/>} />
         {/* <Route path="/wishlist" element={<Wishlist />} /> */}
       </Routes>
     </BrowserRouter>
