@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "../Pages/Sidebar";
+import ProfileMenu from "../Pages/ProfileMenu"; // ✅ Import Profile Menu
 import "./Wishlist.css";
 
 const Wishlist = () => {
@@ -9,9 +10,9 @@ const Wishlist = () => {
   const [newItem, setNewItem] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [message, setMessage] = useState(""); 
+  const [message, setMessage] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const [extraMessage, setExtraMessage] = useState(""); 
+  const [extraMessage, setExtraMessage] = useState("");
   const [showExtraPopup, setShowExtraPopup] = useState(false);
 
   const addItem = () => {
@@ -30,59 +31,42 @@ const Wishlist = () => {
   const markAsAccomplished = (index, itemName) => {
     const accomplishedItem = wishlistItems[index];
 
-    // Update saved amount after item is purchased
     const newSavedAmount = Math.max(0, savedAmount - accomplishedItem.amount);
     setSavedAmount(newSavedAmount);
 
-    setMessage(`MAKE YOUR OTHER WISHES HAPPEN JUST LIKE YOUR ${itemName}`);
+    setMessage(`Make Your Other Wishes Happen Just Like Your ${itemName}`);
     setShowPopup(true);
 
     setCompletedItems([...completedItems, accomplishedItem]);
     removeItem(index);
+  };
 
-    setTimeout(() => {
-      setShowPopup(false);
-      
-      // Show the extra message after 10 seconds
-      setExtraMessage(`You have Rs. ${newSavedAmount} for your other wishes.\nSAVE MORE TO SPEND MORE 💰`);
-      setShowExtraPopup(true);
+  const handleFirstPopupClose = () => {
+    setShowPopup(false);
+    setExtraMessage(`You have Rs. ${savedAmount} for your other wishes.\nSAVE MORE TO SPEND MORE 💰`);
+    setShowExtraPopup(true);
+  };
 
-      setTimeout(() => {
-        setShowExtraPopup(false);
-      }, 3000);
-    }, 10000);
+  const handleSecondPopupClose = () => {
+    setShowExtraPopup(false);
   };
 
   return (
     <div className="wishlist-layout">
-      <Sidebar /> 
+      <Sidebar />
 
-      <div className="wishlist-content">
-        <div className="wishlist-header">
-          <h1 className="wishlist-title">WishList</h1>
-          <div className="wishlist-subtitle-box">
-            <h2 className="wishlist-subtitle">
-              Save Today, Own Tomorrow: <br /> Your Future Starts with Every Penny!
-            </h2>
-          </div>
-        </div>
+      {/* ✅ Profile Menu Added */}
+      <div className="profile-menu-container">
+        <ProfileMenu />
+      </div>
 
-        {/* ✅ Popup Messages */}
-        {showPopup && (
-          <div className="popup-overlay">
-            <div className="popup-content">
-              <p>{message}</p>
-            </div>
-          </div>
-        )}
+      {/* ✅ Blurred background when popups are active */}
+      <div className={`wishlist-content ${showPopup || showExtraPopup ? "blurred" : ""}`}>
+        <h1 className="wishlist-title">WishList</h1>
 
-        {showExtraPopup && (
-          <div className="popup-overlay">
-            <div className="popup-content">
-              <p>{extraMessage}</p>
-            </div>
-          </div>
-        )}
+        <p className="saved-amount-subheading">
+          The money you saved after the expenses of {new Date().toLocaleString("default", { month: "long" })} could be used for your desires. <br /> Save more daily and start tracking the path towards your wishes.......
+        </p>
 
         <div className="saved-amount-container">
           <input
@@ -169,7 +153,37 @@ const Wishlist = () => {
             </div>
           </div>
         )}
+
+        <div className="wishlist-subtitle-box">
+          <h2 className="wishlist-subtitle">
+            Save Today, Own Tomorrow: <br /> Your Future Starts with Every Penny!
+          </h2>
+        </div>
       </div>
+
+      {/* ✅ First Popup Message */}
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <p>{message}</p>
+            <button className="popup-button light-blue" onClick={handleFirstPopupClose}>
+              Sure, Thank you
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Second Popup Message */}
+      {showExtraPopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <p>{extraMessage}</p>
+            <button className="popup-button blue" onClick={handleSecondPopupClose}>
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
