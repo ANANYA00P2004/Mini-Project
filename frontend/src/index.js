@@ -7,9 +7,10 @@ import SignUp from "./Pages/Signup";
 import Expenses from "./Pages/Expenses";
 import BudgetPlan from "./Pages/BudgetPlan";
 import Home from "./Pages/Home"
-// import Wishlist from "./Pages/Wishlist";
+import Wishlist from "./Pages/Wishlist";
 import FutureEvents from "./Pages/FutureEvent";
 import Chatbot from "./Pages/chatbot";
+import ProfileMenu from "./Pages/ProfileMenu"
 
 const Root = () => {
   return (
@@ -23,7 +24,8 @@ const Root = () => {
         <Route path="/futureevents" element={<FutureEvents />} /> 
         <Route path="/home" element={<Home/>}/>
         <Route path="/chatbot" element={<Chatbot/>}/>
-        {/* <Route path="/wishlist" element={<Wishlist />} /> */}
+        <Route path="/profile" element={<ProfileMenu />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
     </BrowserRouter>
   );

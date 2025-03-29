@@ -178,11 +178,11 @@ h3 {
 }
 
 .add-card {
-  color: #4caf50;
+  color: #f44336;
 }
 
 .minus-card {
-  color: #f44336;
+  color:#4caf50 ;
 }
 
 .add-card p,

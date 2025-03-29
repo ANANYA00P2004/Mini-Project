@@ -46,10 +46,10 @@ const categoryIcons = {
 
 export default function Expenses() {
   // State for financial data from Budget table
-  const [financialData, setFinancialData] = useState({
-    income: 0,
-    savings: 0,
-  })
+  // const [financialData, setFinancialData] = useState({
+  //   income: 0,
+  //   savings: 0,
+  // })
 
   // State for categories from Categories table
   const [categories, setCategories] = useState([])
@@ -99,7 +99,7 @@ export default function Expenses() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUserId(user.id)
-        fetchBudgetData(user.id)
+        fetchFinancialData(user.id)
         fetchCategories(user.id)
         fetchTransactions(user.id)
       }
@@ -108,27 +108,65 @@ export default function Expenses() {
     fetchUser()
   }, [])
 
-  // Fetch budget data from Budget table
-  const fetchBudgetData = async (userId) => {
+  const [financialData, setFinancialData] = useState({
+    income: 0,
+    savings: 0,
+    monthlyExpenses: 0,
+  });
+
+  // Function to fetch aggregated financial data
+  const fetchFinancialData = async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('Budget')
-        .select('monthly_income, expected_savings')
-        .eq('user_id', userId)
-        .single()
+      // 1️⃣ Fetch monthly income from the Budget table
+      const { data: budgetData, error: budgetError } = await supabase
+        .from("Budget")
+        .select("monthly_income")
+        .eq('user_id',userId)
+        .single();   // Use .single() if you expect only one row
 
-      if (error) throw error
+      if (budgetError) throw budgetError;
 
-      if (data) {
-        setFinancialData({
-          income: data.monthly_income || 0,
-          savings: data.expected_savings || 0,
-        })
-      }
+      const monthlyIncome = budgetData?.monthly_income || 0;
+
+      // 2️⃣ Aggregate total income from Transactions table
+      const { data: incomeData, error: incomeError } = await supabase
+        .from("Transactions")
+        .select("amount")
+        .eq('user_id',userId)
+        .eq("type", "income");
+
+      const totalIncome = incomeData?.reduce((acc, item) => acc + item.amount, 0) || 0;
+
+      // 3️⃣ Aggregate total expenses from Transactions table
+      const { data: expenseData, error: expenseError } = await supabase
+        .from("Transactions")
+        .select("amount")
+        .eq('user_id',userId)
+        .eq("type", "expense");
+
+      const totalExpenses = expenseData?.reduce((acc, item) => acc + item.amount, 0) || 0;
+
+      // 4️⃣ Calculate financial values
+      const income = monthlyIncome + totalIncome;       // Monthly income + Transactions income
+      const savings = income - totalExpenses;           // Total savings = income - expenses
+      const monthlyExpenses = totalExpenses;            // Sum of all expenses
+
+      // 5️⃣ Update the state with calculated data
+      setFinancialData({
+        income,
+        savings,
+        monthlyExpenses,
+      });
+
     } catch (error) {
-      console.error('Error fetching budget data:', error)
+      console.error("Error fetching financial data:", error.message);
     }
-  }
+  };
+
+  useEffect(() => {
+    fetchFinancialData();
+  }, []);
+
 
   // Fetch categories from Categories table
   const fetchCategories = async (userId) => {
@@ -364,7 +402,7 @@ export default function Expenses() {
           <div className="priority-section">
             <div className="card priority-card" onClick={() => setShowPriorityPopup(true)}>
               <h3>Monthly Expenses</h3>
-              <p className="amount">${financialData.savings}</p>
+              <p className="amount">₹{financialData.monthlyExpenses}</p>
             </div>
           </div>
         </div>
@@ -584,7 +622,7 @@ export default function Expenses() {
                 </div>
                 <div className="transaction-date">{transaction.date}</div>
                 <div className="transaction-amount">
-                  {transaction.type === 'income' ? '+' : '-'}${transaction.amount}
+                  {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount}
                 </div>
               </div>
             ))

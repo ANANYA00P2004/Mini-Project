@@ -1,0 +1,370 @@
+/* Wishlist Layout */
+.wishlist-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar-container {
+  width: 250px;
+  background: #192841;
+}
+
+/* Wishlist Content */
+.wishlist-content {
+  flex: 1;
+  padding: 60px 40px;
+  margin-left: 225px;
+}
+
+/* Wishlist Header (Titles) */
+.wishlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 80px; /* ⬆ Increased space below titles */
+}
+
+/* Wishlist Title */
+.wishlist-title {
+  font-size: 60px;
+  font-weight: bold;
+  color: #192841;
+}
+
+.wishlist-title {
+  margin-top: -50px; /* Reduce this */
+}
+
+
+/* Push Everything Below Titles Further Down */
+.saved-amount-container,
+.wishlist-input-container,
+.add-button,
+.wishlist-items-container {
+  margin-top: 60px;
+}
+
+/* Saved Amount Input */
+.saved-amount-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.saved-amount-input {
+  width: 500px;
+  height: 100px;
+  padding: 50px;
+  font-size: 50px;
+  border-radius: 10px;
+  border: 2px solid hsl(0, 9%, 96%);
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Wishlist Input Fields */
+.wishlist-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+  margin-bottom: 60px
+}
+
+.wishlist-input {
+  width: 350px;
+  height: 100px;
+  padding: 50px;
+  font-size: 35px;
+  border-radius: 10px;
+  border: 2px solid hsl(0, 9%, 96%);
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+/* ✨ Blue Glowing Effect on Input Focus */
+.saved-amount-input:focus,
+.wishlist-input:focus {
+  border-color: #007BFF; /* Blue Border */
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.7); /* Smooth Glowing Effect */
+}
+
+/* Add Button */
+.add-button {
+  display: block;
+  margin: 30px auto;
+  background: #192841;
+  color: white;
+  font-size: 30px;
+  padding: 20px 60px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+.add-button:hover {
+  background-color: #145374;
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.7); /* Hover Glow Effect */
+}
+
+/* Wishlist Items */
+.wishlist-items-container {
+  margin-top: 80px;
+}
+
+.wishlist-item {
+  background: rgb(245, 245, 245);
+  padding: 20px;
+  margin-bottom: 80px;
+  border-radius: 10px;
+  text-align: left;
+  position: relative;
+}
+
+/* Progress Box */
+.progress-box {
+  position: relative;
+  margin-top: 10px;
+}
+
+/* Styling for the progress bar container */
+.progress-bar {
+  background-color: #f1c40f; /* Golden color */
+  position: relative;
+  height: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-out; /* Fade-in effect */
+}
+
+/* Orange striped effect inside the progress bar */
+.progress-fill {
+  background-image: linear-gradient(45deg, #ff8c00 25%, transparent 25%, transparent 50%, #ff8c00 50%, #ff8c00 75%, transparent 75%, transparent);
+  background-size: 50px 50px;
+  height: 100%;
+  border-radius: 10px;
+  animation: sparkleEffect 3s infinite; /* Sparkling effect */
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+  100% {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+/* Sparkling effect */
+@keyframes sparkleEffect {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+
+/* 🎉 Speech Bubble */
+.speech-bubble {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffcc00;
+  color: black;
+  padding: 10px 15px;
+  border-radius: 8px;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: bold;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* ⬆ Speech Bubble Arrow */
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px;
+  border-style: solid;
+  border-color: #ffcc00 transparent transparent transparent;
+}
+
+/* ✅ Show speech bubble on hover */
+.progress-bar:hover + .speech-bubble {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+/* Right Translucent Box */
+.right-text-box {
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Completed Items Section */
+.completed-items-section {
+  margin-top: 50px;
+  padding: 20px;
+  background: #192841;
+  border-radius: 15px;
+  color: white;
+  text-align: center;
+}
+
+.completed-title {
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.completed-items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.completed-item {
+  padding: 15px 30px;
+  background: linear-gradient(90deg, #ffcc00, #ff6600);
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+  animation: glow 1.5s infinite alternate;
+}
+
+/* Accomplished Button */
+.accomplished-button {
+  margin-top: 10px;
+  background: white;
+  color: black;
+  font-size: 18px;
+  padding: 10px 20px;
+  border: 2px solid #192841;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ✅ Blur the background when popup is active */
+.blurred {
+  filter: blur(5px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ✅ Ensure the popup remains clear */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5); /* Dark semi-transparent background */
+  z-index: 1000; /* Ensure it's above everything */
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  z-index: 1001; /* Ensure it's above the blurred background */
+}
+
+/* Popup Buttons */
+.popup-button {
+  margin-top: 20px;
+  padding: 15px 30px;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+
+/* Light Blue Gradient Button */
+.light-blue {
+  background: linear-gradient(90deg, #87CEFA, #4682B4);
+  color: white;
+  border: none;
+}
+
+.light-blue:hover {
+  background: linear-gradient(90deg, #4682B4, #1E90FF);
+}
+
+/* Blue Gradient Button */
+.blue-gradient {
+  background: linear-gradient(90deg, #007BFF, #0056b3);
+  color: white;
+  border: none;
+}
+
+.blue-gradient:hover {
+  background: linear-gradient(90deg, #0056b3, #004080);
+}
+
+
+/* Wishlist Subtitle Box - New Position Below Completed Items */
+.wishlist-subtitle-box {
+  margin-top: 50px;
+  padding: 15px;
+  background: linear-gradient(135deg, #192841, #145374);
+  border-radius: 15px;
+  text-align: center;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Wishlist Subtitle Text */
+.wishlist-subtitle {
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+}
+
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Glow Animation */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px #192841; }
+  100% { box-shadow: 0 0 15px #145374; }
+}
