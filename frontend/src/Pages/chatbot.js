@@ -17,8 +17,17 @@ const Chatbot = () => {
     const [endDate, setEndDate] = useState("");
     const [reportData, setReportData] = useState(null);
     const [userId, setUserId] = useState("");
+    const [userInfo, setUserInfo] = useState(null);
     const [categoryId, setCategoryId] = useState("");
     const [type, setType] = useState("");
+    const [budgetData, setBudgetData] = useState(null);
+    const [categoriesData, setCategoriesData] = useState([]);
+    const [transactionsData, setTransactionsData] = useState([]);
+    const [groupedTransactions, setGroupedTransactions] = useState({});
+    const [totalIncome, setTotalIncome] = useState(0);
+    const [totalExpenses, setTotalExpenses] = useState(0);
+    const [netSavings, setNetSavings] = useState(0);
+    const logopath= require('../images/logo.PNG');
 
     useEffect(() => {
         const storedUserId = localStorage.getItem("user_id");
@@ -82,7 +91,19 @@ const Chatbot = () => {
 
             if (response.data.success) {
                 setReportData(response.data.report);
+                setUserInfo(response.data.user);
+                setBudgetData(response.data.budget);
+                setCategoriesData(response.data.categories);
+                setTransactionsData(response.data.transactions);
+                setGroupedTransactions(response.data.groupedTransactions);
                 setShowReportModal(false);
+
+                
+                if (response.data.summary) {
+                    setTotalIncome(response.data.summary.totalIncome);
+                    setTotalExpenses(response.data.summary.totalExpenses);
+                    setNetSavings(response.data.summary.netSavings);
+                }
             } else {
                 alert("No data found for the selected period.");
             }
@@ -97,28 +118,145 @@ const Chatbot = () => {
             alert("No report data available to download.");
             return;
         }
-
+    
         const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text("📊 Financial Report", 10, 10);
-
-        let y = 20;
-
-        Object.keys(reportData).forEach((date) => {
+    
+        // Add Banner and Logo
+        doc.setFillColor(0, 51, 102);
+        doc.rect(0, 0, 210, 20, "F");
+        doc.addImage(logopath, "PNG", 10, 5, 30, 30);
+    
+        // Title
+        doc.setFontSize(24);
+        doc.setTextColor(255);
+        doc.text("WYZO Financial Report", 70, 14);
+    
+        let y = 40;
+    
+        // User and Report Period
+        if (userInfo) {
             doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`User: ${userInfo.name || "N/A"}`, 10, y);
+            y += 8;
+        }
+        const periodText =
+            reportDuration === "custom"
+                ? `Period: ${startDate} to ${endDate}`
+                : `Period: ${reportDuration}`;
+        doc.text(periodText, 10, y);
+        y += 10;
+    
+        // Budget Summary
+        if (budgetData) {
+            doc.setFontSize(16);
+            doc.setTextColor(0, 102, 51);
+            doc.text("Budget Summary", 10, y);
+            y += 8;
+    
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            doc.text(`Monthly Income: $${budgetData.monthly_income}`, 15, y);
+            y += 6;
+            doc.text(`Expected Savings: $${budgetData.expected_savings}`, 15, y);
+            y += 10;
+        }
+    
+        // Financial Summary
+        if (totalIncome !== undefined && totalExpenses !== undefined) {
+            doc.setFontSize(16);
+            doc.setTextColor(0, 102, 51);
+            doc.text("Financial Summary", 10, y);
+            y += 8;
+    
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            doc.text(`Total Income: $${totalIncome}`, 15, y);
+            y += 6;
+            doc.text(`Total Expenses: $${totalExpenses}`, 15, y);
+            y += 6;
+            doc.text(`Net Savings: $${netSavings}`, 15, y);
+            y += 12;
+        }
+    
+        // Categories
+        if (categoriesData && categoriesData.length > 0) {
+            doc.setFontSize(16);
+            doc.setTextColor(0, 102, 51);
+            doc.text("Categories", 10, y);
+            y += 8;
+    
+            doc.setFontSize(12);
+            doc.setTextColor(0);
+            categoriesData.forEach((category) => {
+                doc.text(`- ${category.label}`, 15, y);
+                y += 6;
+            });
+            y += 8;
+        }
+    
+        // Transactions
+        doc.setFontSize(16);
+        doc.setTextColor(0, 102, 51);
+        doc.text("Transaction Details", 10, y);
+        y += 8;
+    
+        Object.keys(reportData).forEach((date) => {
+            if (y > 250) {
+                doc.addPage();
+                y = 20;
+            }
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 100);
             doc.text(`Date: ${date}`, 10, y);
             y += 8;
-
-            reportData[date].forEach((item) => {
+    
+            reportData[date].forEach((item, index) => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+                const bgColor = index % 2 === 0 ? [240, 240, 240] : [255, 255, 255];
+                doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+                doc.rect(10, y - 4, 190, 8, "F");
+    
                 doc.setFontSize(12);
-                doc.text(`- ${item.category} | ${item.type} | $${item.amount}`, 10, y);
+                doc.setTextColor(item.type === "income" ? 0 : 255, item.type === "income" ? 100 : 0, 0);
+                doc.text(
+                    `- ${item.category} | ${item.type} | $${item.amount}`,
+                    10,
+                    y
+                );
                 y += 6;
             });
             y += 4;
         });
-
-        doc.save("Financial_Report.pdf");
+    
+        // Add Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.line(10, doc.internal.pageSize.height - 15, 200, doc.internal.pageSize.height - 15);
+            doc.text(
+                `Page ${i} of ${pageCount} - Generated on ${new Date().toLocaleDateString()}`,
+                105,
+                doc.internal.pageSize.height - 10,
+                { align: "center" }
+            );
+        }
+         // 📝 Footer
+        doc.setFontSize(10);
+        doc.text("Wyzo Financial Management", 10, y + 10);
+        doc.text("https://www.wyzoapp.com", 10, y + 16);
+        doc.text("Support: support@wyzoapp.com", 10, y + 22);
+        doc.text("Privacy Policy & Disclaimer", 10, y + 28);
+    
+        // Save the PDF
+        doc.save("WYZO_Financial_Report.pdf");
     };
+    
 
     return (
         <Layout>
