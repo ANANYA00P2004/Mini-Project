@@ -317,7 +317,7 @@ const Chatbot = () => {
                 {reportData && (
                     <div className="chatbot-report-result">
                         <h3>📊 Financial Report</h3>
-                        <button onClick={downloadPDF}>📥 Download PDF</button>
+                        <button onClick={downloadPDF}>📥 Download PDF</button><br></br>
                         {Object.keys(reportData).length > 0 ? (
                             <div>
                                 {Object.keys(reportData).map((date, idx) => (

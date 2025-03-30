@@ -5,8 +5,10 @@ const axios = require("axios");
 const dotenv = require("dotenv");
 
 dotenv.config();
+ 
 const app = express();
 const PORT = 5002;
+
 app.use(cors({
     origin: 'http://localhost:3000', 
     methods: ['GET', 'POST'],

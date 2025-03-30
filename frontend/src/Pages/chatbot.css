@@ -1,24 +1,26 @@
 .chatbot-body {
     font-family: 'Inter', Arial, sans-serif;
-    background-color: #f0f4f8;
+    border-color: #b3e0ff;
+    border-radius: 10px;
+    border: solid #b3e0ff;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100vh; /* Full height of the viewport */
+    width: 65vw;  /* Full width of the viewport */
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
     color: #1a2b3c;
 }
 
+/* Container to stretch to the background width */
 .chatbot-container {
-    width: 420px;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(26, 43, 60, 0.1);
+    width: 100%; /* Make it fill the outer container */
+    max-width: 1200px; /* Optional: Set a max width to prevent excessive stretching */
+    margin: 0 auto; /* Center it horizontally */
     padding: 20px;
-    display: flex;
-    flex-direction: column;
-    height: 520px;
-    border: 1px solid #e1e7ec;
+    box-sizing: border-box; /* Ensures padding doesn’t affect width */
 }
 
 .chatbot-box {
@@ -27,6 +29,7 @@
     border-bottom: 1px solid #e1e7ec;
     margin-bottom: 10px;
     padding: 10px;
+    max-height: 300px; /* To avoid overflow */
 }
 
 .chatbot-message {
@@ -79,7 +82,7 @@
     box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.25);
 }
 
-
+/* Scrollbar Styling */
 .chatbot-box::-webkit-scrollbar {
     width: 6px;
 }
@@ -93,7 +96,7 @@
     border-radius: 3px;
 }
 
-
+/* Markdown Styling */
 .chatbot-message ul {
     padding-left: 20px;
     margin-top: 5px;
@@ -110,7 +113,7 @@
     font-style: italic;
 }
 
-
+/* Typing Indicator */
 .chatbot-typing-indicator {
     font-size: 12px;
     color: #718096;
@@ -124,7 +127,7 @@
     50% { opacity: 1; }
 }
 
-
+/* Report Button */
 .chatbot-report-box {
     margin-top: 10px;
     text-align: center;
@@ -144,7 +147,7 @@
     background-color: hsl(0, 0%, 90%);
 }
 
-
+/* Modal Overlay */
 .chatbot-modal-overlay {
     position: fixed;
     top: 0;
@@ -184,23 +187,23 @@
     background-color: #4c51bf;
 }
 
-
+/* Report Result */
 .chatbot-report-result {
     margin-top: 20px;
     padding: 10px;
     background: #e6f7ff;
     border-radius: 8px;
     border: 1px solid #b3e0ff;
-    max-width: 400px;
-    min-width: 300px;
-    word-wrap: break-word;
+    max-height: 200px; /* Prevents overflow */
+    overflow-y: auto;
+    width: 100%; /* Takes full width */
 }
 
 .chatbot-report-result h3 {
     margin-top: 0;
 }
 
-
+/* Report Items */
 .chatbot-report-item {
     padding: 8px;
     border-radius: 6px;
@@ -212,4 +215,19 @@
 .chatbot-report-item p {
     margin: 5px 0;
     font-size: 13px;
+}
+
+/* PDF Button */
+.chatbot-report-result button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #5a67d8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.chatbot-report-result button:hover {
+    background-color: #4c51bf;
 }
