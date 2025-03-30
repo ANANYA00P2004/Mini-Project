@@ -465,7 +465,7 @@ const WishlistPage = () => {
       <div className="wishlist-header">
         <h1>My Wishlist</h1>
         <p className="saved-amount-subheading">
-          The money you saved after the expenses of {new Date().toLocaleString("default", { month: "long" })} could be used for your desires. <br /> Save more daily and start tracking the path towards your wishes.......
+          The money you saved could be used for your desires. <br /> Save more daily and start tracking the path towards your wishes.......
         </p>
         <div className="wishlist-savings-card">
           <PiggyBank size={32} />
