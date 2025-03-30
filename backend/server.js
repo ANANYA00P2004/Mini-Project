@@ -35,5 +35,5 @@ app.use("/api/home", homeRoutes);
 app.use("/api/BudgetPlan",BudgetPlan)
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log('🚀 Server running on http://localhost:${PORT}');
 });
