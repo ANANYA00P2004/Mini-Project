@@ -47,7 +47,7 @@ const Chatbot = () => {
         setIsTyping(true);
 
         try {
-            const API_URL = "http://localhost:5002";
+            const API_URL = "http://localhost:5000";
             const response = await axios.post(`${API_URL}/api/get-response`, {
                 message: input,
             });
@@ -85,7 +85,7 @@ const Chatbot = () => {
         if (type) requestData.type = type;
 
         try {
-            const response = await axios.get("http://localhost:5002/api/generate-report", {
+            const response = await axios.get("http://localhost:5000/api/generate-report", {
                 params: requestData,
             });
 

@@ -1,6 +1,7 @@
 const supabase = require("../src/supabaseClient");
 
 let lastReportData=null;
+console.log("Right now lastReportData is:", lastReportData);
 
 exports.generateReport = async (req, res) => {
     console.log("Received Query Params:", req.query);
