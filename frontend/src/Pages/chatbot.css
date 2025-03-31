@@ -1,8 +1,8 @@
 .chatbot-body {
     font-family: 'Inter', Arial, sans-serif;
-    border-color: #b3e0ff;
-    border-radius: 10px;
-    border: solid #b3e0ff;
+    border-color: #bce1f9;
+    border-radius: 5px;
+    border: 1.5px solid #b3e0ff;
     display: flex;
     justify-content: center;
     align-items: center;

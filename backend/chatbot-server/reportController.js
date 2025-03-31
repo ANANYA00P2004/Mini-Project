@@ -1,5 +1,7 @@
 const supabase = require("../src/supabaseClient");
 
+let lastReportData=null;
+
 exports.generateReport = async (req, res) => {
     console.log("Received Query Params:", req.query);
 
@@ -117,6 +119,21 @@ exports.generateReport = async (req, res) => {
         
     const netSavings = totalIncome - totalExpenses;
 
+    lastReportData = {
+        user: user || null,
+        budget: budget || null,
+        transactions: reportData,
+        summary: {
+          totalIncome,
+          totalExpenses,
+          netSavings
+        },
+        dateRange: {
+          startDate,
+          endDate
+        }
+      };
+      console.log("Stored report data for chat:", JSON.stringify(lastReportData, null, 2))
     // 4️⃣ Return report data to frontend
     res.json({
       success: true,
@@ -137,3 +154,10 @@ exports.generateReport = async (req, res) => {
     res.status(500).json({ error: "Error generating report." });
   }
 };
+
+// exports.getLastReportData = () => lastReportData;
+
+exports.getLastReportData = () => {
+    console.log("Retrieving report data for chat:", lastReportData ? "Data available" : "No data");
+    return lastReportData;
+  };
