@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PiggyBank from "./Pages/piggyBank";
 import LandingPage from "./Pages/LandingPage";
+import NotificationFrontend from "./notificationFrontend"; // ✅ Import notifications
 import "./App.css";
 
 const App = () => {
@@ -16,7 +17,12 @@ const App = () => {
     }
   }, [loading]);
 
-  return <div className="app-container">{loading ? <PiggyBank /> : <LandingPage />}</div>;
+  return (
+    <div className="app-container">
+      {loading ? <PiggyBank /> : <LandingPage />}
+      <NotificationFrontend /> {/* ✅ Include notification UI */}
+    </div>
+  );
 };
 
 export default App;
