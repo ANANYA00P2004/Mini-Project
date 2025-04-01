@@ -121,32 +121,51 @@ const Chatbot = () => {
     
         const doc = new jsPDF();
     
-        // Add Banner and Logo
         doc.setFillColor(0, 51, 102);
         doc.rect(0, 0, 210, 20, "F");
         doc.addImage(logopath, "PNG", 10, 5, 30, 30);
     
-        // Title
         doc.setFontSize(24);
         doc.setTextColor(255);
         doc.text("WYZO Financial Report", 70, 14);
     
         let y = 40;
     
-        // User and Report Period
         if (userInfo) {
             doc.setFontSize(14);
-            doc.setTextColor(0, 0, 0);
+            doc.setTextColor(0, 51, 102);
+            doc.setFont("helvetica", "bold");
             doc.text(`User: ${userInfo.name || "N/A"}`, 10, y);
-            y += 8;
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(0, 51, 102);
+            doc.line(10, y + 2, 70, y + 2); // Underline
+            y += 10;
         }
+
         const periodText =
             reportDuration === "custom"
-                ? `Period: ${startDate} to ${endDate}`
-                : `Period: ${reportDuration}`;
+            ? `Reporting Period: ${startDate} to ${endDate}`
+            : `Reporting Period: Last ${reportDuration} days`;
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0);
         doc.text(periodText, 10, y);
-        y += 10;
+        y += 12;
     
+        // 📊 Summary Box on Right
+        doc.setFillColor(245, 245, 245);
+        doc.rect(130, 40, 70, 30, "F");
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text("Key Highlights", 135, 46);
+        doc.setFontSize(10);
+        const topCategory =
+        categoriesData && categoriesData.length > 0
+            ? categoriesData[0].label
+            : "N/A";
+        doc.text(`Net Savings: $${netSavings}`, 135, 54);
+        doc.text(`Top Spending: ${topCategory || "N/A"}`, 135, 60);
+        
         // Budget Summary
         if (budgetData) {
             doc.setFontSize(16);
@@ -188,11 +207,17 @@ const Chatbot = () => {
     
             doc.setFontSize(12);
             doc.setTextColor(0);
-            categoriesData.forEach((category) => {
-                doc.text(`- ${category.label}`, 15, y);
-                y += 6;
+
+            let x = 10;
+            categoriesData.forEach((category, index) => {
+                doc.text(`- ${category.label}`, x, y);
+                x += 60;
+                if ((index + 1) % 3 === 0) {
+                    x = 10;
+                    y += 6;
+                }
             });
-            y += 8;
+            y += 12;
         }
     
         // Transactions
@@ -211,6 +236,15 @@ const Chatbot = () => {
             doc.text(`Date: ${date}`, 10, y);
             y += 8;
     
+            // Create Table Headers
+            doc.setFillColor(230, 230, 230);
+            doc.rect(10, y - 4, 190, 8, "F");
+            doc.setTextColor(0);
+            doc.text("Category", 15, y);
+            doc.text("Type", 80, y);
+            doc.text("Amount", 140, y);
+            y += 6;
+
             reportData[date].forEach((item, index) => {
                 if (y > 270) {
                     doc.addPage();
@@ -222,30 +256,30 @@ const Chatbot = () => {
     
                 doc.setFontSize(12);
                 doc.setTextColor(item.type === "income" ? 0 : 255, item.type === "income" ? 100 : 0, 0);
-                doc.text(
-                    `- ${item.category} | ${item.type} | $${item.amount}`,
-                    10,
-                    y
-                );
+                doc.text(item.category, 15, y);
+                doc.text(item.type, 80, y);
+                doc.text(`$${item.amount}`, 140, y);
                 y += 6;
             });
-            y += 4;
+            y += 6;
         });
-    
+
         // Add Footer
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
+            doc.setFillColor(0, 51, 102);
+            doc.rect(0, doc.internal.pageSize.height - 15, 210, 15, "F");
             doc.setFontSize(10);
-            doc.setTextColor(100);
-            doc.line(10, doc.internal.pageSize.height - 15, 200, doc.internal.pageSize.height - 15);
+            doc.setTextColor(255);
             doc.text(
-                `Page ${i} of ${pageCount} - Generated on ${new Date().toLocaleDateString()}`,
+                `Page ${i} of ${pageCount} | Generated on ${new Date().toLocaleDateString()}`,
                 105,
-                doc.internal.pageSize.height - 10,
+                doc.internal.pageSize.height - 5,
                 { align: "center" }
             );
         }
+
          // 📝 Footer
         doc.setFontSize(10);
         doc.text("Wyzo Financial Management", 10, y + 10);

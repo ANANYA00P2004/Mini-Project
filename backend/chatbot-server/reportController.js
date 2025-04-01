@@ -45,8 +45,9 @@ exports.generateReport = async (req, res) => {
       .from("Transactions")
       .select("amount, type, category_id, date, Categories(label)")//category_id = 8(shopping), type =income/expense, label=food
       .eq("user_id", user_id)
-      .gte("date", start_date)
-      .lte("date", end_date);
+      .gte("date", startDate)
+      .lte("date", endDate);
+      console.log(`Fetching transactions between ${startDate} and ${endDate}`);
 
     // 2️⃣ Apply optional filters (if provided)
     if (category_id) {
