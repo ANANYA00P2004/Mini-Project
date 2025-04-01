@@ -1,53 +1,26 @@
-const express = require("express");
-const router = express.Router();
-const supabase = require("../../supabaseClient");
+// WishRoutes.js
+const express = require("express")
+const router = express.Router()
+const WishController = require("../controllers/WishController")
+const { authenticateUser } = require("../middleware/auth") // Adjust path as needed
 
-// Get all wishlist items for a specific user
-router.get("/", async (req, res) => {
-  const { userId } = req.query;
-  if (!userId) return res.status(400).json({ error: "User ID is required" });
+// Apply authentication middleware to all routes
+router.use(authenticateUser)
 
-  try {
-    const { data, error } = await supabase.from("wishlist").select("*").eq("user_id", userId);
-    if (error) throw error;
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Get all wishlist items for a user
+router.get("/user/:userId", WishController.getWishlistItems)
 
 // Add a new wishlist item
-router.post("/", async (req, res) => {
-  const { user_id, name, budget } = req.body;
-  if (!user_id || !name || !budget) {
-    return res.status(400).json({ error: "User ID, name, and budget are required" });
-  }
+router.post("/", WishController.addWishlistItem)
 
-  try {
-    const { data, error } = await supabase.from("wishlist").insert([{ user_id, name, budget }]).select();
-    if (error) throw error;
-    res.status(201).json(data[0]);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Update a wishlist item's saved amount
+router.patch("/:itemId/contribute", WishController.updateSavedAmount)
 
 // Delete a wishlist item
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
+router.delete("/:itemId", WishController.deleteWishlistItem)
 
-  try {
-    const { data, error: fetchError } = await supabase.from("wishlist").select("*").eq("id", id);
-    if (fetchError) throw fetchError;
-    if (!data.length) return res.status(404).json({ error: "Item not found" });
+// Get financial summary for a user
+router.get("/financial-summary/:userId", WishController.getFinancialSummary)
 
-    const { error: deleteError } = await supabase.from("wishlist").delete().eq("id", id);
-    if (deleteError) throw deleteError;
+module.exports = router
 
-    res.status(200).json({ message: "Item deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-module.exports = router;
