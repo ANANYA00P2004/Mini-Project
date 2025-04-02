@@ -1,191 +1,342 @@
-import React, { useState } from "react";
-import Sidebar from "../Pages/Sidebar";
-import ProfileMenu from "../Pages/ProfileMenu"; // ✅ Import Profile Menu
-import "./Wishlist.css";
+"use client"
 
-const Wishlist = () => {
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [completedItems, setCompletedItems] = useState([]);
-  const [savedAmount, setSavedAmount] = useState("");
-  const [newItem, setNewItem] = useState("");
-  const [newAmount, setNewAmount] = useState("");
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [message, setMessage] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
-  const [extraMessage, setExtraMessage] = useState("");
-  const [showExtraPopup, setShowExtraPopup] = useState(false);
+import { useState, useEffect } from "react"
+import { Trash2, Plus, DollarSign, IndianRupee, Target, PiggyBank, ShoppingBag, Car, Home, Briefcase, Plane, Gift, Coffee, Heart } from "lucide-react"
+import "./Wishlist.css"
+import Layout from "./Layout"
 
-  const addItem = () => {
-    if (newItem && newAmount) {
-      setWishlistItems([...wishlistItems, { item: newItem, amount: parseFloat(newAmount) }]);
-      setNewItem("");
-      setNewAmount("");
+const BASE_URL = "http://localhost:5000/api/wishlist";
+// Icons mapping for different goal types
+const goalIcons = {
+  default: <Target size={24} />,
+  shopping: <ShoppingBag size={24} />,
+  car: <Car size={24} />,
+  home: <Home size={24} />,
+  travel: <Plane size={24} />,
+  education: <Briefcase size={24} />,
+  gift: <Gift size={24} />,
+  entertainment: <Coffee size={24} />,
+  health: <Heart size={24} />
+};
+
+const WishlistPage = () => {
+  const [financialData, setFinancialData] = useState({
+    income: 0,
+    savings: 0,
+    monthlyExpenses: 0,
+    availableSavings: 0 // Track available savings after contributions
+  })
+
+  const [wishlistItems, setWishlistItems] = useState([])
+  const [newGoal, setNewGoal] = useState({
+    item: "",
+    expectedCost: "",
+    category: "default" // Default category for icons
+  })
+  const [contribution, setContribution] = useState({
+    amount: "",
+    itemId: "", // Changed from selectedItemId to match controller expectation
+  })
+  const [userId, setUserId] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(null)
+  const [debugInfo, setDebugInfo] = useState(null) // For debugging purposes
+
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setUserId(storedUserId);
+      fetchFinancialData(storedUserId);
+      fetchWishlistItems(storedUserId);
+    }
+  }, []);
+
+  const fetchFinancialData = async (userId) => {
+    try {
+      // Updated to match router path
+      const response = await fetch(`${BASE_URL}/financial-data?userId=${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setFinancialData(data);
+    } catch (err) {
+      console.error("Error fetching financial data:", err);
+      setError("Failed to load financial data");
     }
   };
 
-  const removeItem = (index) => {
-    const updatedItems = wishlistItems.filter((_, i) => i !== index);
-    setWishlistItems(updatedItems);
+  const fetchWishlistItems = async (userId) => {
+    try {
+      // Updated to match router path (root path)
+      const response = await fetch(`${BASE_URL}?userId=${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setWishlistItems(data);
+    } catch (err) {
+      console.error("Error fetching wishlist items:", err);
+      setError("Failed to load wishlist items");
+    }
   };
 
-  const markAsAccomplished = (index, itemName) => {
-    const accomplishedItem = wishlistItems[index];
-
-    const newSavedAmount = Math.max(0, savedAmount - accomplishedItem.amount);
-    setSavedAmount(newSavedAmount);
-
-    setMessage(`Make Your Other Wishes Happen Just Like Your ${itemName}`);
-    setShowPopup(true);
-
-    setCompletedItems([...completedItems, accomplishedItem]);
-    removeItem(index);
+  const handleAddGoal = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // Updated to match router path
+      const response = await fetch(`${BASE_URL}/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId, 
+          item: newGoal.item, 
+          expectedCost: parseFloat(newGoal.expectedCost),
+          category: newGoal.category 
+        })
+      });
+      if (!response.ok) throw new Error("Failed to add goal");
+      setNewGoal({ item: "", expectedCost: "", category: "default" });
+      fetchWishlistItems(userId);
+      setSuccess("Goal added successfully");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error("Error adding goal:", err);
+      setError("Failed to add goal");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleFirstPopupClose = () => {
-    setShowPopup(false);
-    setExtraMessage(`You have Rs. ${savedAmount} for your other wishes.\nSAVE MORE TO SPEND MORE 💰`);
-    setShowExtraPopup(true);
+  const handleContribute = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // Updated to match router path and HTTP method (PUT)
+      const response = await fetch(`${BASE_URL}/contribute`, {
+        method: "PUT", // Changed from POST to PUT to match router
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          itemId: contribution.itemId, // Changed key name from selectedItemId to itemId
+          amount: parseFloat(contribution.amount)
+        })
+      });
+      if (!response.ok) throw new Error("Failed to contribute");
+      setContribution({ amount: "", itemId: "" });
+      fetchWishlistItems(userId);
+      fetchFinancialData(userId);
+      setSuccess("Contribution added successfully");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error("Error adding contribution:", err);
+      setError("Failed to contribute");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSecondPopupClose = () => {
-    setShowExtraPopup(false);
+  const handleDeleteGoal = async (goalId) => {
+    setLoading(true);
+    try {
+      // Updated to match router path
+      const response = await fetch(`${BASE_URL}/delete/${goalId}`, { method: "DELETE" });
+      if (!response.ok) throw new Error("Failed to delete goal");
+      fetchWishlistItems(userId);
+      setSuccess("Goal deleted successfully");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error("Error deleting goal:", err);
+      setError("Failed to delete goal");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setLoading(false);
+    }
   };
+  
+  const getGoalIcon = (category) => {
+    return goalIcons[category] || goalIcons.default;
+  }
 
   return (
-    <div className="wishlist-layout">
-      <Sidebar />
-
-      {/* ✅ Profile Menu Added */}
-      <div className="profile-menu-container">
-        <ProfileMenu />
+    <Layout>
+    <div className="wishlist-container">
+      <div className="wishlist-header">
+        <h1>My Wishlist</h1>
+        <p className="saved-amount-subheading">
+          The money you saved could be used for your desires. <br /> Save more daily and start tracking the path towards your wishes.......
+        </p>
+        <div className="wishlist-savings-card">
+          <PiggyBank size={32} />
+          <div className="wishlist-savings-info">
+            <h2>Available Savings</h2>
+            <p className="wishlist-amount">₹{financialData.availableSavings.toFixed(2)}</p>
+            <p className="wishlist-total-savings">Total Savings: ₹{financialData.savings.toFixed(2)}</p>
+          </div>
+        </div>
       </div>
 
-      {/* ✅ Blurred background when popups are active */}
-      <div className={`wishlist-content ${showPopup || showExtraPopup ? "blurred" : ""}`}>
-        <h1 className="wishlist-title">WishList</h1>
+      {error && <div className="wishlist-error">{error}</div>}
+      {success && <div className="wishlist-success">{success}</div>}
+      {debugInfo && (
+        <div className="wishlist-debug">
+          <p>Debug Info (will be removed in production)</p>
+          <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+        </div>
+      )}
 
-        <p className="saved-amount-subheading">
-          The money you saved after the expenses of {new Date().toLocaleString("default", { month: "long" })} could be used for your desires. <br /> Save more daily and start tracking the path towards your wishes.......
-        </p>
+      <div className="wishlist-content">
+        <div className="wishlist-add-goal">
+          <h2>Add New Goal</h2>
+          <form onSubmit={handleAddGoal}>
+            <div className="wishlist-form-group">
+              <label>Goal Name</label>
+              <div className="wishlist-input-icon">
+                <Target size={18} />
+                <input
+                  type="text"
+                  value={newGoal.item}
+                  onChange={(e) => setNewGoal({ ...newGoal, item: e.target.value })}
+                  placeholder="What are you saving for?"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-        <div className="saved-amount-container">
-          <input
-            type="number"
-            placeholder="Saved Amount"
-            className="saved-amount-input"
-            value={savedAmount}
-            onChange={(e) => setSavedAmount(parseFloat(e.target.value) || 0)}
-          />
+            <div className="wishlist-form-group">
+              <label>Expected Cost</label>
+              <div className="wishlist-input-icon">
+              <IndianRupee size={18} />
+                <input
+                  type="number"
+                  value={newGoal.expectedCost}
+                  onChange={(e) => setNewGoal({ ...newGoal, expectedCost: e.target.value })}
+                  placeholder="How much will it cost?"
+                  min="0.01"
+                  step="0.01"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            
+            <button type="submit" className="wishlist-button" disabled={loading}>
+              <Plus size={18} />
+              {loading ? "Adding..." : "Add Goal"}
+            </button>
+          </form>
         </div>
 
-        <div className="wishlist-input-container">
-          <input
-            type="text"
-            placeholder="Enter Item"
-            className="wishlist-input"
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-          />
-          <input
-            type="number"
-            placeholder="Enter Amount"
-            className="wishlist-input"
-            value={newAmount}
-            onChange={(e) => setNewAmount(e.target.value)}
-          />
+        <div className="wishlist-contribute">
+          <h2>Contribute to Goal</h2>
+          <form onSubmit={handleContribute}>
+            <div className="wishlist-form-group">
+              <label>Select Goal</label>
+              <select
+                value={contribution.itemId || ""}
+                onChange={(e) => setContribution({ ...contribution, itemId: e.target.value })}
+                required
+                disabled={loading || wishlistItems.length === 0}
+                
+              >
+                <option value="">Select a goal</option>
+                {wishlistItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.item} (₹{item.currently_saved?.toFixed(2) || "0.00"}/₹{item.expected_cost?.toFixed(2) || "0.00"})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="wishlist-form-group">
+              <label>Amount to Contribute</label>
+              <div className="wishlist-input-icon">
+                <IndianRupee size={18} />
+                <input
+                  type="number"
+                  value={contribution.amount}
+                  onChange={(e) => setContribution({ ...contribution, amount: e.target.value })}
+                  placeholder="How much to add?"
+                  min="0.01"
+                  max={financialData.availableSavings}
+                  step="0.01"
+                  required
+                  disabled={loading || wishlistItems.length === 0}
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              className="wishlist-button"
+              disabled={loading || wishlistItems.length === 0 || !contribution.itemId}
+            >
+              <Plus size={18} />
+              {loading ? "Adding..." : "Add Contribution"}
+            </button>
+          </form>
         </div>
+      </div>
 
-        <button className="add-button" onClick={addItem}>ADD</button>
+      <div className="wishlist-goals">
+        <h2>My Goals</h2>
+        {loading && wishlistItems.length === 0 ? (
+          <p className="wishlist-loading">Loading your goals...</p>
+        ) : wishlistItems.length === 0 ? (
+          <p className="wishlist-empty">No goals added yet. Add your first goal above!</p>
+        ) : (
+          <div className="wishlist-goals-list">
+            {wishlistItems.map((item) => {
+              const progress = item.expected_cost > 0 ? (item.currently_saved / item.expected_cost) * 100 : 0
 
-        <div className="wishlist-items-container">
-          {wishlistItems.map((item, index) => {
-            const progress = (savedAmount / item.amount) * 100;
-            const savedForItem = Math.min(savedAmount, item.amount);
-
-            return (
-              <div key={index} className="wishlist-item">
-                <p className="wishlist-item-name">{item.item} - Rs. {item.amount}</p>
-
-                <div className="progress-box">
-                  <button className="close-button" onClick={() => removeItem(index)}>×</button>
-
-                  <div
-                    className="progress-bar"
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${Math.min(progress, 100)}%` }}
-                    />
+              return (
+                <div key={item.id} className="wishlist-goal-card">
+                  <div className="wishlist-goal-header">
+                    <div className="wishlist-goal-title">
+                      <div className="wishlist-goal-icon">
+                        {getGoalIcon(item.category)}
+                      </div>
+                      <h3>{item.item}</h3>
+                    </div>
+                    <button 
+                      className="wishlist-delete-button" 
+                      onClick={() => handleDeleteGoal(item.id)}
+                      disabled={loading}
+                      type="button"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
 
-                  {hoveredIndex === index && (
-                    <div className="speech-bubble">
-                      🎉 You saved Rs. {savedForItem} for your {item.item}! 🎉
-                    </div>
-                  )}
+                  <div className="wishlist-goal-amounts">
+                    <span>Saved: ₹{(item.currently_saved || 0).toFixed(2)}</span>
+                    <span>Goal: ₹{(item.expected_cost || 0).toFixed(2)}</span>
+                  </div>
 
-                  {progress < 100 ? (
-                    <div className="right-text-box">
-                      You should save Rs. {item.amount - savedAmount} more to achieve your goal. Keep going, buddy!
-                    </div>
-                  ) : (
-                    <button className="accomplished-button" onClick={() => markAsAccomplished(index, item.item)}>
-                      Accomplished 🎉
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  <div className="wishlist-progress-container">
+                    <div 
+                      className="wishlist-progress-bar" 
+                      style={{ width: `${Math.min(progress, 100)}%` }}
+                    ></div>
+                  </div>
 
-        {completedItems.length > 0 && (
-          <div className="completed-items-section">
-            <h2 className="completed-title">Completed 🎯</h2>
-            <div className="completed-items-container">
-              {completedItems.map((item, index) => (
-                <div key={index} className="completed-item">
-                  {item.item}
+                  <div className="wishlist-progress-percentage">
+                    {progress.toFixed(0)}% Complete
+                    {progress >= 100 && <span className="wishlist-goal-completed"> ✓ Ready to purchase!</span>}
+                  </div>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         )}
-
-        <div className="wishlist-subtitle-box">
-          <h2 className="wishlist-subtitle">
-            Save Today, Own Tomorrow: <br /> Your Future Starts with Every Penny!
-          </h2>
-        </div>
       </div>
-
-      {/* ✅ First Popup Message */}
-      {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <p>{message}</p>
-            <button className="popup-button light-blue" onClick={handleFirstPopupClose}>
-              Sure, Thank you
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ✅ Second Popup Message */}
-      {showExtraPopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <p>{extraMessage}</p>
-            <button className="popup-button blue" onClick={handleSecondPopupClose}>
-              Okay
-            </button>
-          </div>
-        </div>
-      )}
     </div>
-  );
-};
+    </Layout>
+  )
+}
 
-export default Wishlist;
+export default WishlistPage
