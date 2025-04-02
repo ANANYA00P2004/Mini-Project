@@ -111,9 +111,9 @@ exports.getDashboardData = async (req, res) => {
       ],
     };
 
-  // 8️⃣ Category-wise Spending
+    // 8️⃣ Category-wise Spending
 const categoryExpenses = transactions
-.filter((t) => t.type === "expense") // Filter only expenses
+.filter((t) => t.type === "expense")
 .reduce((acc, curr) => {
   acc[curr.category_id] = (acc[curr.category_id] || 0) + curr.amount;
   return acc;
@@ -122,9 +122,8 @@ const categoryExpenses = transactions
 // Fetch all categories
 const { data: categories, error: categoriesError } = await supabase
 .from("Categories")
-.select("id, label, category_limits, category_priority, remaining_amount, excess_amount")
+.select("id, label, category_limits, category_priority")
 .eq("user_id", user_id);
-
 if (categoriesError) throw categoriesError;
 
 if (!categories || categories.length === 0) {
@@ -141,14 +140,12 @@ const categoryLimit = cat.category_limits !== null ? cat.category_limits : remai
 
 return {
   id: cat.id,
-  label: cat.label || "Unknown Category", // Ensure label is never null
-  category_limits: cat.category_limits || 0, // Handle potential null values
-  category_priority: cat.category_priority || 0, // Handle potential null values
+  label: cat.label || "Unknown Category",
   spent: totalExpense,
   remaining: Math.max(0, categoryLimit - totalExpense),
   exceeding: Math.max(0, totalExpense - categoryLimit),
   limitReduction: 0, // Track reductions from lower-priority categories
-  priority: cat.category_priority || 0, // Default priority if null
+  priority: cat.category_priority,
 };
 });
 
@@ -157,7 +154,7 @@ let totalExceeding = categorySpending.reduce((sum, cat) => sum + cat.exceeding, 
 
 // Distribute the exceeded amount from **lowest-priority (higher number) to highest-priority (1)**
 if (totalExceeding > 0) {
-// Sort categories in descending order of priority (lower priority first)
+// Sort categories in descending order of priority (higher number first, lower priority first)
 categorySpending.sort((a, b) => b.priority - a.priority);
 
 for (let i = 0; i < categorySpending.length && totalExceeding > 0; i++) {
@@ -170,27 +167,6 @@ for (let i = 0; i < categorySpending.length && totalExceeding > 0; i++) {
     totalExceeding -= deduction;
   }
 }
-}
-
-// 📝 Prepare Updates for Supabase
-const updates = categorySpending.map((cat) => ({
-id: cat.id,
-label: cat.label, // Include label to satisfy NOT NULL constraint
-category_limits: cat.category_limits, // Include category limits
-category_priority: cat.category_priority, // Include category priority
-remaining_amount: cat.remaining, // Update remaining amount
-excess_amount: cat.exceeding, // Update excess amount
-}));
-
-// 🔥 Batch Update Supabase with Remaining and Excess Amounts
-const { data: updatedData, error: updateError } = await supabase
-.from("Categories")
-.upsert(updates, { onConflict: ["id"] }); // Updates based on category id
-
-if (updateError) {
-console.error("Error updating category amounts:", updateError);
-} else {
-console.log("Category amounts updated successfully:", updatedData);
 }
 
 // Convert category data into chart-compatible format
@@ -208,7 +184,7 @@ if (cat.exceeding > 0) {
 if (cat.limitReduction > 0) {
   labels.push("Limit Reduction");
   dataValues.push(cat.limitReduction);
-  backgroundColors.push("#8B5CF6"); // Purple for limit reduction
+  backgroundColors.push("#8B5CF6"); // Purple color for limit reduction
 }
 
 return {
@@ -227,6 +203,7 @@ return {
 
 // Debugging Output
 console.log("Final Category Spending Data:", formattedCategorySpending);
+
 
 
     // 9️⃣ Top 3 Expense Categories
