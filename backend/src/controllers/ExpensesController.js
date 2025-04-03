@@ -1,224 +1,120 @@
-const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = require("../supabaseClient");
 
-// Helper to verify user from token
-const getUserFromToken = async (req) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return null;
-  
+// Fetch aggregated financial data
+exports.getFinancialData = async (req, res) => {
   try {
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error) throw error;
-    return data.user;
+    const { userId } = req.params;
+
+    // Fetch monthly income
+    const { data: budgetData, error: budgetError } = await supabase
+      .from("Budget")
+      .select("monthly_income")
+      .eq("user_id", userId)
+      .single();
+
+    if (budgetError) throw budgetError;
+
+    const monthlyIncome = budgetData?.monthly_income || 0;
+
+    // Aggregate total income
+    const { data: incomeData, error: incomeError } = await supabase
+      .from("Transactions")
+      .select("amount")
+      .eq("user_id", userId)
+      .eq("type", "income");
+
+    const totalIncome = incomeData?.reduce((acc, item) => acc + item.amount, 0) || 0;
+
+    // Aggregate total expenses
+    const { data: expenseData, error: expenseError } = await supabase
+      .from("Transactions")
+      .select("amount")
+      .eq("user_id", userId)
+      .eq("type", "expense");
+
+    const totalExpenses = expenseData?.reduce((acc, item) => acc + item.amount, 0) || 0;
+
+    const income = monthlyIncome + totalIncome;
+    const savings = income - totalExpenses;
+    const monthlyExpenses = totalExpenses;
+
+    res.json({ income, savings, monthlyExpenses });
   } catch (error) {
-    console.error('Error verifying user token:', error);
-    return null;
+    res.status(500).json({ error: error.message });
   }
 };
 
-const ExpensesController = {
-  // Get user's budget data
-  getBudgetData: async (req, res) => {
-    try {
-      const user = await getUserFromToken(req);
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
+// Fetch categories
+exports.getCategories = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { data, error } = await supabase
+      .from("Categories")
+      .select("*")
+      .eq("user_id", userId)
+      .order("label");
 
-      const { data, error } = await supabase
-        .from('Budget')
-        .select('monthly_income, expected_savings')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error) throw error;
-
-      res.status(200).json({
-        income: data?.monthly_income || 0,
-        savings: data?.expected_savings || 0
-      });
-    } catch (error) {
-      console.error('Error fetching budget data:', error);
-      res.status(500).json({ error: 'Error fetching budget data' });
-    }
-  },
-
-  // Get user's categories
-  getCategories: async (req, res) => {
-    try {
-      const user = await getUserFromToken(req);
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-      const { data, error } = await supabase
-        .from('Categories')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('label');
-
-      if (error) throw error;
-
-      res.status(200).json(data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      res.status(500).json({ error: 'Error fetching categories' });
-    }
-  },
-
-  // Get user's transactions
-  getTransactions: async (req, res) => {
-    try {
-      const user = await getUserFromToken(req);
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-      const { data, error } = await supabase
-        .from('Transactions')
-        .select(`
-          id,
-          amount,
-          date,
-          description,
-          type,
-          Categories(id, label)
-        `)
-        .eq('user_id', user.id)
-        .order('date', { ascending: false });
-
-      if (error) throw error;
-
-      const formattedTransactions = data.map(transaction => ({
-        id: transaction.id,
-        category: transaction.Categories.label,
-        category_id: transaction.Categories.id,
-        amount: transaction.amount,
-        date: transaction.date,
-        description: transaction.description,
-        type: transaction.type
-      }));
-
-      res.status(200).json(formattedTransactions);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      res.status(500).json({ error: 'Error fetching transactions' });
-    }
-  },
-
-  // Add new transaction (expense or income)
-  addTransaction: async (req, res) => {
-    try {
-      const user = await getUserFromToken(req);
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-      const { category_id, amount, date, description, type } = req.body;
-
-      // Validate input
-      if (!category_id || !amount || !date || !type) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-
-      // Insert transaction
-      const { data, error } = await supabase
-        .from('Transactions')
-        .insert({
-          user_id: user.id,
-          category_id,
-          amount: Number.parseFloat(amount),
-          date,
-          description,
-          type
-        })
-        .select();
-
-      if (error) throw error;
-
-      res.status(201).json(data[0]);
-    } catch (error) {
-      console.error('Error adding transaction:', error);
-      res.status(500).json({ error: 'Error adding transaction' });
-    }
-  },
-
-  // Update a transaction
-  updateTransaction: async (req, res) => {
-    try {
-      const user = await getUserFromToken(req);
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-      const { id } = req.params;
-      const { category_id, amount, date, description } = req.body;
-
-      // Validate input
-      if (!id) return res.status(400).json({ error: 'Transaction ID is required' });
-
-      // Verify user owns this transaction
-      const { data: existingTx, error: fetchError } = await supabase
-        .from('Transactions')
-        .select('id')
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (fetchError || !existingTx) {
-        return res.status(404).json({ error: 'Transaction not found' });
-      }
-
-      // Update transaction
-      const { data, error } = await supabase
-        .from('Transactions')
-        .update({
-          category_id,
-          amount: Number.parseFloat(amount),
-          date,
-          description
-        })
-        .eq('id', id)
-        .select();
-
-      if (error) throw error;
-
-      res.status(200).json(data[0]);
-    } catch (error) {
-      console.error('Error updating transaction:', error);
-      res.status(500).json({ error: 'Error updating transaction' });
-    }
-  },
-
-  // Delete a transaction
-  deleteTransaction: async (req, res) => {
-    try {
-      const user = await getUserFromToken(req);
-      if (!user) return res.status(401).json({ error: 'Unauthorized' });
-
-      const { id } = req.params;
-
-      // Verify user owns this transaction
-      const { data: existingTx, error: fetchError } = await supabase
-        .from('Transactions')
-        .select('id')
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .single();
-
-      if (fetchError || !existingTx) {
-        return res.status(404).json({ error: 'Transaction not found' });
-      }
-
-      // Delete transaction
-      const { error } = await supabase
-        .from('Transactions')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      res.status(200).json({ message: 'Transaction deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting transaction:', error);
-      res.status(500).json({ error: 'Error deleting transaction' });
-    }
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = ExpensesController;
+// Fetch transactions
+exports.getTransactions = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { data, error } = await supabase
+      .from("Transactions")
+      .select("id, amount, date, description, type, category_id")
+      .eq("user_id", userId)
+      .order("date", { ascending: false });
+
+    if (error) throw error;
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Add new expense
+exports.addExpense = async (req, res) => {
+  try {
+    const { user_id, category_id, amount, date, description } = req.body;
+    const { error } = await supabase.from("Transactions").insert({
+      user_id,
+      category_id,
+      amount: parseFloat(amount),
+      date,
+      description,
+      type: "expense",
+    });
+
+    if (error) throw error;
+    res.json({ message: "Expense added successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Add new income
+exports.addIncome = async (req, res) => {
+  try {
+    const { user_id, category_id, amount, date, description } = req.body;
+    const { error } = await supabase.from("Transactions").insert({
+      user_id,
+      category_id,
+      amount: parseFloat(amount),
+      date,
+      description,
+      type: "income",
+    });
+
+    if (error) throw error;
+    res.json({ message: "Income added successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

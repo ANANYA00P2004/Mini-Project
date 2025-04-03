@@ -1,29 +1,18 @@
-const express = require('express');
+const express = require("express");
+const {
+  getFinancialData,
+  getCategories,
+  getTransactions,
+  addExpense,
+  addIncome,
+} = require("../controllers/ExpensesController");
+
 const router = express.Router();
-const ExpensesController = require('../controllers/ExpensesController');
 
-// Middleware to verify JWT token
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Missing or invalid authorization token' });
-  }
-  
-  // Token validation is handled in the controller
-  next();
-};
-
-// Budget routes
-router.get('/budget', authenticateToken, ExpensesController.getBudgetData);
-
-// Categories routes
-router.get('/categories', authenticateToken, ExpensesController.getCategories);
-
-// Transactions routes
-router.get('/transactions', authenticateToken, ExpensesController.getTransactions);
-router.post('/transactions', authenticateToken, ExpensesController.addTransaction);
-router.put('/transactions/:id', authenticateToken, ExpensesController.updateTransaction);
-router.delete('/transactions/:id', authenticateToken, ExpensesController.deleteTransaction);
+router.get("/financial-data/:userId", getFinancialData);
+router.get("/categories/:userId", getCategories);
+router.get("/transactions/:userId", getTransactions);
+router.post("/add-expense", addExpense);
+router.post("/add-income", addIncome);
 
 module.exports = router;

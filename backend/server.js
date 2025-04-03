@@ -8,7 +8,7 @@ const authRoutes = require("./src/routes/AuthRoutes");
 const futureEventRoutes = require("./src/routes/FutureEventRoute"); // Import future event routes
 const homeRoutes = require("./src/routes/HomeRoute");
 const BudgetPlan = require("./src/routes/BudgetRoutes")
-//const Expenses = require("./src/routes/ExpensesRoute")
+const Expenses = require("./src/routes/ExpensesRoute")
 const Wishlist = require("./src/routes/WishlistRoute")
 
 const app = express();
@@ -35,6 +35,7 @@ app.use("/api/futureevents", futureEventRoutes);
 app.use("/api/home", homeRoutes);
 app.use("/api/BudgetPlan",BudgetPlan)
 app.use("/api/wishlist",Wishlist);
+app.use("/api/expenses",Expenses)
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
